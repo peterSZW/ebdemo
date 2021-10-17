@@ -2,21 +2,11 @@ package mobile
 
 import (
 	"github.com/hajimehoshi/ebiten/v2/mobile"
-	"eb-demo"
-)
-
-type size struct {
-	width  int
-	height int
-}
-
-var (
-	window size
-	game   *eb-demo.Game
+	"github.com/peterSZW/ebdemo/ebgame"
 )
 
 func init() {
-	mobile.SetGame(&Game{})
+	mobile.SetGame(&ebgame.Game{})
 }
- 
+
 func Dummy() {}

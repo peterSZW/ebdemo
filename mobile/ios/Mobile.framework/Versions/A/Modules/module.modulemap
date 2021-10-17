@@ -1,0 +1,10 @@
+framework module "Mobile" {
+    header "Ebitenmobileview.objc.h"
+    header "Mobile.h"
+    header "Mobile.objc.h"
+    header "MobileEbitenViewController.h"
+    header "Universe.objc.h"
+    header "ref.h"
+
+    export *
+}

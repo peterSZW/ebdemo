@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	"github.com/peterszw/ebdemo/ebgame"
+	"github.com/peterSZW/ebdemo/ebgame"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )

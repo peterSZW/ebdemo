@@ -1,9 +1,9 @@
-module ebdemo
+module github.com/peterSZW/ebdemo
 
 go 1.17
 
 require github.com/hajimehoshi/ebiten/v2 v2.2.0-alpha.15
-require github.com/peterszw/ebdemo/ebgame v0.0.0
+ 
 
 require (
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20210727001814-0db043d8d5be // indirect
@@ -15,4 +15,4 @@ require (
 	golang.org/x/sys v0.0.0-20210917161153-d61c044b1678 // indirect
 )
 
-replace github.com/peterszw/ebdemo/ebgame => ./ebgame
+ 

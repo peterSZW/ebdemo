@@ -17,6 +17,6 @@ class MobileEbitenViewControllerWithErrorHandling: MobileEbitenViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         let bounds = UIScreen.main.bounds
-        //MobileSetWindowSize(Int(bounds.width), Int(bounds.height))
+        MobileSetWindowSize(Int(bounds.width), Int(bounds.height))
     }
 }

@@ -2,6 +2,7 @@ package ebgame
 
 import (
 	"fmt"
+	"image"
 	"image/color"
 	_ "image/png"
 
@@ -10,7 +11,7 @@ import (
 )
 
 var img *ebiten.Image
-
+var screenSize image.Point
 var pointerImage = ebiten.NewImage(8, 8)
 
 //初始化
@@ -37,13 +38,18 @@ var xx float64
 var yy float64
 
 var r float64
+var touchStr string
+
+const (
+	widthAsDots = 480.
+)
 
 //循环计算
 func (g *Game) Update() error {
 	x = x + xx
 	y = y + yy
 
-	if x > 1024-100 {
+	if x > float64(screenSize.X)-2.0 {
 		xx = -5
 	}
 
@@ -51,13 +57,25 @@ func (g *Game) Update() error {
 		xx = 5
 	}
 
-	if y > 768-100 {
+	if y > float64(screenSize.Y)-2.0 {
 		yy = -5
 	}
 	if y < 0 {
 		yy = 5
 	}
 	// r = r + 0.1
+
+	touchStr = ""
+
+	touches := ebiten.TouchIDs()
+
+	if len(touches) > 0 {
+		for _, id := range touches {
+			x, y := ebiten.TouchPosition(id)
+			touchStr = touchStr + "\n" + fmt.Sprintf("(%d,%d)", x, y)
+		}
+	}
+
 	return nil
 }
 
@@ -65,7 +83,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	//打印 hello world 加帧数
 
 	mx, my := ebiten.CursorPosition()
-	s := fmt.Sprintf("Hello, World! FPS : %f %d %d", ebiten.CurrentFPS(), mx, my)
+	s := fmt.Sprintf("\n\n\nHello, World! FPS : %f %d %d %s", ebiten.CurrentFPS(), mx, my, touchStr)
 
 	ebitenutil.DebugPrint(screen, s)
 
@@ -74,13 +92,23 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(x, y)
-	op.GeoM.Scale(0.5, 0.5)
+	//op.GeoM.Scale(0.5, 0.5)
 
-	//screen.DrawImage(img, op)
+	screen.DrawImage(pointerImage, op)
+	op = &ebiten.DrawImageOptions{}
+	op.GeoM.Translate(x+10, y)
 	screen.DrawImage(pointerImage, op)
 
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
-	return 512, 384
+
+	return screenSize.X, screenSize.Y
+}
+func (g *Game) SetWindowSize(width, height int) {
+	// screenSize.X = int(widthAsDots)
+	// screenSize.Y = int(widthAsDots / float64(width) * float64(height))
+	screenSize.X = width
+	screenSize.Y = height
+
 }

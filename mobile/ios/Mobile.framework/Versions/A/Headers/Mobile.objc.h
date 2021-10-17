@@ -13,4 +13,6 @@
 
 FOUNDATION_EXPORT void MobileDummy(void);
 
+FOUNDATION_EXPORT void MobileSetWindowSize(long width, long height);
+
 #endif

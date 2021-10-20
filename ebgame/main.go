@@ -5,7 +5,6 @@ import (
 	"image"
 	"image/color"
 	_ "image/png"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -29,12 +28,12 @@ var (
 
 //初始化
 func init() {
-	var err error
-	//读图片
-	img, _, err = ebitenutil.NewImageFromFile("10.png")
-	if err != nil {
-		log.Fatal(err)
-	}
+	// var err error
+	// //读图片
+	// img, _, err = ebitenutil.NewImageFromFile("10.png")
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
 
 	pointerImage.Fill(color.RGBA{0xff, 0, 0, 0xff})
 

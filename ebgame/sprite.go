@@ -235,30 +235,6 @@ func NewSprite() *Sprite {
 	return sprite
 }
 
-func newAnimation(path string, duration int, steps int, filter ebiten.Filter) *Animation {
-	var err error
-	animation := new(Animation)
-	animation.Path = path
-	animation.Image, _, err = ebitenutil.NewImageFromFile(path)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-	animation.Steps = steps
-	animation.Duration = time.Millisecond * time.Duration(duration)
-
-	width, height := animation.Image.Size()
-	animation.StepWidth = width / animation.Steps
-	animation.StepHeight = height
-
-	animation.currentStepTimeStart = time.Now()
-	animation.OneStepDuration = time.Duration(int(animation.Duration) / animation.Steps)
-
-	animation.Effects = make([]*animationEffect, 0)
-
-	return animation
-}
-
 func newAnimationByte(rawImage *[]byte, duration int, steps int, filter ebiten.Filter) *Animation {
 	var err error
 	animation := new(Animation)
@@ -308,9 +284,6 @@ Example :
 
 mySprite.AddAnimation("walk-right",	"walk_right.png", 700, 6, ebiten.FilterNearest)
 */
-func (sprite *Sprite) AddAnimation(label string, path string, duration int, steps int, filter ebiten.Filter) {
-	sprite.Animations[label] = newAnimation(path, duration, steps, filter)
-}
 
 func (sprite *Sprite) AddAnimationByte(label string, rawImage *[]byte, duration int, steps int, filter ebiten.Filter) {
 	sprite.Animations[label] = newAnimationByte(rawImage, duration, steps, filter)

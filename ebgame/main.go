@@ -5,6 +5,7 @@ import (
 	"image"
 	"image/color"
 	_ "image/png"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -12,7 +13,6 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/peterSZW/ebdemo/ebgame/gfx"
-	"github.com/peterSZW/go-sprite"
 )
 
 var img *ebiten.Image
@@ -24,17 +24,17 @@ var curpath string
 var errstr string
 
 var (
-	explosion1, explosion2, explosion3 *sprite.Sprite
+	explosion1, explosion2, explosion3 *Sprite
 )
 
 //初始化
 func init() {
-	// var err error
-	// //读图片
-	// img, _, err = ebitenutil.NewImageFromFile("10.png")
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
+	var err error
+	//读图片
+	img, _, err = ebitenutil.NewImageFromFile("10.png")
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	pointerImage.Fill(color.RGBA{0xff, 0, 0, 0xff})
 
@@ -57,7 +57,7 @@ func init() {
 
 	}
 
-	explosion3 = sprite.NewSprite()
+	explosion3 = NewSprite()
 	explosion3.AddAnimationByte("default", &gfx.EXPLOSION3, 500, 9, ebiten.FilterNearest)
 	//explosion3.AddAnimation("default", "gfx/explosion3.png", explosionDuration, 9, ebiten.FilterNearest)
 	explosion3.Position(240-10-48, 400/3*2)

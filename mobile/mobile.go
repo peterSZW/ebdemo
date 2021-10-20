@@ -1,7 +1,10 @@
 package mobile
 
 import (
-	"github.com/hajimehoshi/ebiten"
+	"log"
+
+	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/mobile"
 	"github.com/peterSZW/ebdemo/ebgame"
 )
@@ -28,4 +31,14 @@ func init() {
 	mobile.SetGame(game)
 }
 
+func kkk() {
+	var err error
+	//读图片
+	img, _, err = ebitenutil.NewImageFromFile("10.png")
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Println(img)
+
+}
 func Dummy() {}

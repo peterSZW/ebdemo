@@ -5,14 +5,27 @@ import (
 	"image"
 	"image/color"
 	_ "image/png"
+	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
+	"github.com/peterSZW/ebdemo/ebgame/gfx"
+	"github.com/peterSZW/go-sprite"
 )
 
 var img *ebiten.Image
 var screenSize image.Point
 var pointerImage = ebiten.NewImage(8, 8)
+
+var home string
+var curpath string
+var errstr string
+
+var (
+	explosion1, explosion2, explosion3 *sprite.Sprite
+)
 
 //初始化
 func init() {
@@ -28,6 +41,32 @@ func init() {
 	xx = 5
 	yy = 5
 
+	home = os.Getenv("HOME")
+	curpath = getCurrentDirectory()
+	errstr = ""
+
+	f, err := os.Create(home + "/Library/Caches/output3.txt") //创建文件
+	defer f.Close()
+	if err == nil {
+		_, err = f.WriteString("writesn") //写入文件(字节数组)
+
+		f.Sync()
+	}
+	if err != nil {
+		errstr = err.Error()
+
+	}
+
+	explosion3 = sprite.NewSprite()
+	explosion3.AddAnimationByte("default", &gfx.EXPLOSION3, 500, 9, ebiten.FilterNearest)
+	//explosion3.AddAnimation("default", "gfx/explosion3.png", explosionDuration, 9, ebiten.FilterNearest)
+	explosion3.Position(240-10-48, 400/3*2)
+	explosion3.Start()
+
+}
+func file_exist(path string) bool {
+	_, err := os.Lstat(path)
+	return !os.IsNotExist(err)
 }
 
 type Game struct{}
@@ -79,11 +118,23 @@ func (g *Game) Update() error {
 	return nil
 }
 
+func getCurrentDirectory() string {
+	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
+	if err != nil {
+		return err.Error()
+
+	}
+	return strings.Replace(dir, "\\", "/", -1)
+}
+
 func (g *Game) Draw(screen *ebiten.Image) {
 	//打印 hello world 加帧数
 
 	mx, my := ebiten.CursorPosition()
-	s := fmt.Sprintf("\n\n\nHello, World! FPS : %f %d %d %s", ebiten.CurrentFPS(), mx, my, touchStr)
+
+	s := fmt.Sprintf("\n\n\nHello, World! FPS : %f %d %d %s\n%s\n %v\n%d",
+		ebiten.CurrentFPS(), mx, my, touchStr, curpath+"\n"+home,
+		file_exist(home+"/Library/Caches/output3.txt"), errstr)
 
 	ebitenutil.DebugPrint(screen, s)
 
@@ -98,6 +149,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	op = &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(x+10, y)
 	screen.DrawImage(pointerImage, op)
+
+	explosion3.Draw(screen)
 
 }
 

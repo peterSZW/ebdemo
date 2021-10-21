@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
@@ -84,6 +85,24 @@ const (
 	widthAsDots = 480.
 )
 
+func limiXY(x, y float64) (float64, float64) {
+	if x > float64(screenSize.X)-2.0 {
+		x = float64(screenSize.X) - 2.0
+	}
+
+	if x < 0 {
+		x = 0
+	}
+
+	if y > float64(screenSize.Y)-2.0 {
+		y = float64(screenSize.Y) - 2.0
+	}
+	if y < 0 {
+		y = 0
+	}
+	return x, y
+}
+
 //循环计算
 func (g *Game) Update() error {
 
@@ -119,6 +138,7 @@ func (g *Game) Update() error {
 	if len(touches) > 0 {
 
 		if joytouch.tid != 0 {
+			//alread have last press, so we need to find is this touch still on screen
 			id := touches[0]
 			for _, id = range touches {
 				if int(id) == int(joytouch.GetTid()) {
@@ -134,6 +154,8 @@ func (g *Game) Update() error {
 				xx, yy = joytouch.Move(x, y)
 			} else {
 				joytouch.tid = 0
+				joytouch.x = 0
+				joytouch.y = 0
 				//find new press
 
 				for _, id := range touches {
@@ -158,6 +180,7 @@ func (g *Game) Update() error {
 
 				if joytouch.Press(x, y, int(id)) {
 					isstillpress = true
+					touchStr = touchStr + "\n" + "Press"
 					break
 				}
 
@@ -174,8 +197,23 @@ func (g *Game) Update() error {
 
 		explosion3.X = explosion3.X + xx
 		explosion3.Y = explosion3.Y + yy
+
+		explosion3.X, explosion3.Y = limiXY(explosion3.X, explosion3.Y)
+
+	} else {
+		//all reased
+		joytouch.tid = 0
+		joytouch.x = 0
+		joytouch.y = 0
+	}
+	touchStr = touchStr + "\n" + fmt.Sprintf("[%f,%f]", xx, yy)
+	touchStr = touchStr + "\n" + fmt.Sprintf("[%d,%d]", joytouch.x, joytouch.y)
+	touchStr = touchStr + "\n" + fmt.Sprintf("[%d]", joytouch.tid)
+	if isstillpress {
+		touchStr = touchStr + "\n" + "STILL PRESS"
 	}
 
+	time.Sleep(10 * time.Millisecond)
 	return nil
 }
 

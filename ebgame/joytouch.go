@@ -1,8 +1,6 @@
 package ebgame
 
-import (
-	"math"
-)
+import "math"
 
 type Rect struct {
 	x int
@@ -37,10 +35,11 @@ func (this *JoyTouch) SetWH(w, h int) {
 	this.height = h
 	this.rect.x = 0
 	this.rect.w = w / 2
-	this.rect.y = h - w/2
+	this.rect.y = h - w
 	this.rect.h = w / 2
 
 }
+
 func (this *JoyTouch) Press(x, y int, tid int) bool {
 	if isInRect(x, y, this.rect) {
 		this.tid = tid
@@ -53,9 +52,18 @@ func (this *JoyTouch) Press(x, y int, tid int) bool {
 
 func (this *JoyTouch) Move(x, y int) (xx float64, yy float64) {
 
-	dis := math.Sqrt(float64((x - this.x) ^ 2 + (y - this.y) ^ 2))
-	xx = float64(x-this.x) / dis
-	yy = float64(y-this.y) / dis
+	xx = 0
+	yy = 0
+	dis := math.Sqrt(float64((x-this.x)*(x-this.x) + (y-this.y)*(y-this.y)))
+
+	// if dis > 0 {
+	// 	xx = float64(x-this.x) / dis
+	// 	yy = float64(y-this.y) / dis
+	// }
+	if dis > 0 {
+		xx = float64(x-this.x) / dis * 5
+		yy = float64(y-this.y) / dis * 5
+	}
 	return
 
 }

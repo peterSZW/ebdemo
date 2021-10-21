@@ -26,6 +26,8 @@ var (
 	explosion1, explosion2, explosion3 *Sprite
 )
 
+var joytouch JoyTouch
+
 //初始化
 func init() {
 	// var err error
@@ -84,6 +86,9 @@ const (
 
 //循环计算
 func (g *Game) Update() error {
+
+	joytouch.SetWH(screenSize.X, screenSize.Y)
+
 	x = x + xx
 	y = y + yy
 
@@ -107,11 +112,68 @@ func (g *Game) Update() error {
 
 	touches := ebiten.TouchIDs()
 
+	isstillpress := false
+
+	xx := 0.
+	yy := 0.
 	if len(touches) > 0 {
+
+		if joytouch.tid != 0 {
+			id := touches[0]
+			for _, id = range touches {
+				if int(id) == int(joytouch.GetTid()) {
+					isstillpress = true
+					break
+
+				}
+			}
+
+			if isstillpress {
+				x, y := ebiten.TouchPosition(id)
+
+				xx, yy = joytouch.Move(x, y)
+			} else {
+				joytouch.tid = 0
+				//find new press
+
+				for _, id := range touches {
+
+					x, y := ebiten.TouchPosition(id)
+
+					if joytouch.Press(x, y, int(id)) {
+						isstillpress = true
+						break
+					}
+
+				}
+
+			}
+
+		} else {
+			//find new press
+
+			for _, id := range touches {
+
+				x, y := ebiten.TouchPosition(id)
+
+				if joytouch.Press(x, y, int(id)) {
+					isstillpress = true
+					break
+				}
+
+			}
+
+		}
+
 		for _, id := range touches {
+
 			x, y := ebiten.TouchPosition(id)
+
 			touchStr = touchStr + "\n" + fmt.Sprintf("(%d,%d)", x, y)
 		}
+
+		explosion3.X = explosion3.X + xx
+		explosion3.Y = explosion3.Y + yy
 	}
 
 	return nil

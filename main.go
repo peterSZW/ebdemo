@@ -9,12 +9,15 @@ import (
 )
 
 func main() {
-	ebiten.SetWindowSize(1024, 768)
-	//ebiten.SetWindowSize(512, 384)
-	ebiten.SetWindowTitle("Hello, World!")
 	game := &ebgame.Game{}
-	//game.SetWindowSize(512, 384)
-	game.SetWindowSize(1024, 768)
+	// w := 1024
+	// h := 768
+	w := 400
+	h := 880
+
+	game.SetWindowSize(w, h)
+	ebiten.SetWindowSize(w, h)
+	ebiten.SetWindowTitle("Hello, World!")
 
 	if err := ebiten.RunGame(game); err != nil {
 		log.Fatal(err)

@@ -175,9 +175,7 @@ func (g *Game) Update() error {
 			//find new press
 
 			for _, id := range touches {
-
 				x, y := ebiten.TouchPosition(id)
-
 				if joytouch.Press(x, y, int(id)) {
 					isstillpress = true
 					touchStr = touchStr + "\n" + "Press"
@@ -250,6 +248,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	screen.DrawImage(pointerImage, op)
 
 	explosion3.Draw(screen)
+	joytouch.DrawBorders(screen, color.White)
 
 }
 

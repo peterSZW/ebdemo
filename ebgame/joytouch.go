@@ -1,6 +1,12 @@
 package ebgame
 
-import "math"
+import (
+	"image/color"
+	"math"
+
+	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
+)
 
 type Rect struct {
 	x int
@@ -31,12 +37,21 @@ func (this *JoyTouch) GetTid() int {
 }
 
 func (this *JoyTouch) SetWH(w, h int) {
-	this.width = w
-	this.height = h
-	this.rect.x = 0
-	this.rect.w = w / 2
-	this.rect.y = h - w
-	this.rect.h = w / 2
+	if h > w {
+		this.width = w
+		this.height = h
+		this.rect.x = 0
+		this.rect.w = w / 2
+		this.rect.y = h - w/2
+		this.rect.h = w / 2
+	} else {
+		this.width = w
+		this.height = h
+		this.rect.x = 0
+		this.rect.w = w / 2
+		this.rect.y = h / 2
+		this.rect.h = h / 2
+	}
 
 }
 
@@ -66,4 +81,19 @@ func (this *JoyTouch) Move(x, y int) (xx float64, yy float64) {
 	}
 	return
 
+}
+
+func (this *JoyTouch) DrawBorders(surface *ebiten.Image, c color.Color) {
+	var x, y, x1, y1 float64
+
+	x = float64(this.rect.x)
+	y = float64(this.rect.y)
+
+	x1 = x + float64(this.rect.w)
+	y1 = y + float64(this.rect.h)
+
+	ebitenutil.DrawLine(surface, x, y, x1, y, c)   // top
+	ebitenutil.DrawLine(surface, x, y1, x1, y1, c) // bottom
+	ebitenutil.DrawLine(surface, x, y, x, y1, c)   // left
+	ebitenutil.DrawLine(surface, x1, y, x1, y1, c) // right
 }

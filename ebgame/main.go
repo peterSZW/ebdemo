@@ -7,12 +7,14 @@ import (
 	_ "image/png"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/peterSZW/ebdemo/ebgame/gfx"
+	"github.com/peterSZW/ebdemo/ebgame/resources/images"
 )
 
 var img *ebiten.Image
@@ -28,20 +30,15 @@ var (
 )
 
 var joytouch JoyTouch
+var joybutton JoyButton
 
 //初始化
 func init() {
-	// var err error
-	// //读图片
-	// img, _, err = ebitenutil.NewImageFromFile("10.png")
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
 
 	pointerImage.Fill(color.RGBA{0xff, 0, 0, 0xff})
 
-	xx = 5
-	yy = 5
+	xxx = 5
+	yyy = 5
 
 	home = os.Getenv("HOME")
 	curpath = getCurrentDirectory()
@@ -59,12 +56,28 @@ func init() {
 
 	}
 
-	explosion3 = NewSprite()
-	explosion3.AddAnimationByte("default", &gfx.EXPLOSION3, 500, 9, ebiten.FilterNearest)
+	explosion2 = NewSprite()
+	//	explosion3.AddAnimationByte("default", &gfx.EXPLOSION3, 500, 9, ebiten.FilterNearest)
+	explosion2.AddAnimationByte("default", &gfx.EXPLOSION2, 500, 7, ebiten.FilterNearest)
+
 	//explosion3.AddAnimation("default", "gfx/explosion3.png", explosionDuration, 9, ebiten.FilterNearest)
-	explosion3.Position(240-10-48, 400/3*2)
+	explosion2.Position(240-10-48, 400/3*2)
+	explosion2.Start()
+
+	explosion3 = NewSprite()
+	explosion3.AddAnimationByte("default", &images.E_ROBO2, 2000, 8, ebiten.FilterNearest)
+	explosion3.Position(300-10-48, 400/3*2)
 	explosion3.Start()
 
+}
+
+func getCurrentDirectory() string {
+	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
+	if err != nil {
+		return err.Error()
+
+	}
+	return strings.Replace(dir, "\\", "/", -1)
 }
 func file_exist(path string) bool {
 	_, err := os.Lstat(path)
@@ -75,8 +88,8 @@ type Game struct{}
 
 var x float64
 var y float64
-var xx float64
-var yy float64
+var xxx float64
+var yyy float64
 
 var r float64
 var touchStr string
@@ -103,38 +116,15 @@ func limiXY(x, y float64) (float64, float64) {
 	return x, y
 }
 
-//循环计算
-func (g *Game) Update() error {
-
-	joytouch.SetWH(screenSize.X, screenSize.Y)
-
-	x = x + xx
-	y = y + yy
-
-	if x > float64(screenSize.X)-2.0 {
-		xx = -5
-	}
-
-	if x < 0 {
-		xx = 5
-	}
-
-	if y > float64(screenSize.Y)-2.0 {
-		yy = -5
-	}
-	if y < 0 {
-		yy = 5
-	}
-	// r = r + 0.1
-
+func GetJoyTouchXY() (xx, yy float64) {
 	touchStr = ""
 
 	touches := ebiten.TouchIDs()
 
 	isstillpress := false
 
-	xx := 0.
-	yy := 0.
+	xx = 0.
+	yy = 0.
 	if len(touches) > 0 {
 
 		if joytouch.tid != 0 {
@@ -178,7 +168,7 @@ func (g *Game) Update() error {
 				x, y := ebiten.TouchPosition(id)
 				if joytouch.Press(x, y, int(id)) {
 					isstillpress = true
-					touchStr = touchStr + "\n" + "Press"
+
 					break
 				}
 
@@ -193,35 +183,130 @@ func (g *Game) Update() error {
 			touchStr = touchStr + "\n" + fmt.Sprintf("(%d,%d)", x, y)
 		}
 
-		explosion3.X = explosion3.X + xx
-		explosion3.Y = explosion3.Y + yy
+	} else {
+		//all reased
+		joytouch.tid = 0
+		joytouch.x = 0
+		joytouch.y = 0
+		xx = 0
+		yy = 0
+	}
+	if isstillpress {
+		touchStr = touchStr + "\n" + "STILL PRESS"
+	}
+	return xx, yy
+}
 
-		explosion3.X, explosion3.Y = limiXY(explosion3.X, explosion3.Y)
+func GetJoyButton() bool {
+	touchStr = ""
+
+	touches := ebiten.TouchIDs()
+
+	isstillpress := false
+
+	if len(touches) > 0 {
+
+		if joybutton.tid != 0 {
+			//alread have last press, so we need to find is this touch still on screen
+			id := touches[0]
+			for _, id = range touches {
+				if int(id) == int(joytouch.GetTid()) {
+					isstillpress = true
+					break
+
+				}
+			}
+
+			if isstillpress {
+				return true
+			} else {
+				joybutton.tid = 0
+
+				for _, id := range touches {
+
+					x, y := ebiten.TouchPosition(id)
+
+					if joybutton.Press(x, y, int(id)) {
+						isstillpress = true
+						break
+					}
+
+				}
+
+			}
+
+		} else {
+			//find new press
+
+			for _, id := range touches {
+				x, y := ebiten.TouchPosition(id)
+				if joytouch.Press(x, y, int(id)) {
+					isstillpress = true
+
+					break
+				}
+
+			}
+
+		}
 
 	} else {
 		//all reased
 		joytouch.tid = 0
 		joytouch.x = 0
 		joytouch.y = 0
+
 	}
+	if isstillpress {
+		touchStr = touchStr + "\n" + "FIRE PRESS"
+	}
+	return isstillpress
+}
+func CalcBallPosition() {
+	x = x + xxx
+	y = y + yyy
+
+	if x > float64(screenSize.X)-2.0 {
+		xxx = -5
+	}
+
+	if x < 0 {
+		xxx = 5
+	}
+
+	if y > float64(screenSize.Y)-2.0 {
+		yyy = -5
+	}
+	if y < 0 {
+		yyy = 5
+	}
+}
+
+var isFirstUpdate = true
+
+//循环计算
+func (g *Game) Update() error {
+	if isFirstUpdate {
+		joytouch.SetWH(screenSize.X, screenSize.Y)
+		joybutton.SetWH(screenSize.X, screenSize.Y)
+		isFirstUpdate = false
+	}
+
+	CalcBallPosition()
+	xx, yy := GetJoyTouchXY()
+	GetJoyButton()
+	// r = r + 0.1
+	explosion3.X = explosion3.X + xx
+	explosion3.Y = explosion3.Y + yy
+
+	explosion3.X, explosion3.Y = limiXY(explosion3.X, explosion3.Y)
+
 	touchStr = touchStr + "\n" + fmt.Sprintf("[%f,%f]", xx, yy)
 	touchStr = touchStr + "\n" + fmt.Sprintf("[%d,%d]", joytouch.x, joytouch.y)
 	touchStr = touchStr + "\n" + fmt.Sprintf("[%d]", joytouch.tid)
-	if isstillpress {
-		touchStr = touchStr + "\n" + "STILL PRESS"
-	}
 
 	time.Sleep(10 * time.Millisecond)
 	return nil
-}
-
-func getCurrentDirectory() string {
-	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
-	if err != nil {
-		return err.Error()
-
-	}
-	return strings.Replace(dir, "\\", "/", -1)
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
@@ -229,9 +314,9 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 	mx, my := ebiten.CursorPosition()
 
-	s := fmt.Sprintf("\n\n\nHello, World! FPS : %f %d %d %s\n%s\n %v\n%d",
-		ebiten.CurrentFPS(), mx, my, touchStr, curpath+"\n"+home,
-		file_exist(home+"/Library/Caches/output3.txt"), errstr)
+	s := fmt.Sprintf("\n\n\n%s\n%s\nFPS : %f %d %d\n%v\n%s\n%s\n%s",
+		curpath, home, ebiten.CurrentFPS(), mx, my,
+		file_exist(home+"/Library/Caches/output3.txt"), errstr, runtime.GOOS, touchStr)
 
 	ebitenutil.DebugPrint(screen, s)
 
@@ -248,7 +333,9 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	screen.DrawImage(pointerImage, op)
 
 	explosion3.Draw(screen)
+	explosion2.Draw(screen)
 	joytouch.DrawBorders(screen, color.White)
+	joybutton.DrawBorders(screen, color.White)
 
 }
 

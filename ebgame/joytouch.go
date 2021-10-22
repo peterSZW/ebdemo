@@ -8,21 +8,6 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
-type Rect struct {
-	x int
-	y int
-	w int
-	h int
-}
-
-func isInRect(x int, y int, r Rect) bool {
-	if x > r.x && x < r.x+r.w && y > r.y && y < r.y+r.h {
-		return true
-	} else {
-		return false
-	}
-}
-
 type JoyTouch struct {
 	x      int
 	y      int

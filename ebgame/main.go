@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strconv"
 	"strings"
 	"time"
 
@@ -31,6 +32,8 @@ var (
 
 var joytouch JoyTouch
 var joybutton JoyButton
+
+var sps []*Sprite
 
 //初始化
 func init() {
@@ -198,7 +201,6 @@ func GetJoyTouchXY() (xx, yy float64) {
 }
 
 func GetJoyButton() bool {
-	touchStr = ""
 
 	touches := ebiten.TouchIDs()
 
@@ -210,7 +212,7 @@ func GetJoyButton() bool {
 			//alread have last press, so we need to find is this touch still on screen
 			id := touches[0]
 			for _, id = range touches {
-				if int(id) == int(joytouch.GetTid()) {
+				if int(id) == int(joybutton.GetTid()) {
 					isstillpress = true
 					break
 
@@ -218,7 +220,7 @@ func GetJoyButton() bool {
 			}
 
 			if isstillpress {
-				return true
+
 			} else {
 				joybutton.tid = 0
 
@@ -240,7 +242,7 @@ func GetJoyButton() bool {
 
 			for _, id := range touches {
 				x, y := ebiten.TouchPosition(id)
-				if joytouch.Press(x, y, int(id)) {
+				if joybutton.Press(x, y, int(id)) {
 					isstillpress = true
 
 					break
@@ -252,13 +254,13 @@ func GetJoyButton() bool {
 
 	} else {
 		//all reased
-		joytouch.tid = 0
-		joytouch.x = 0
-		joytouch.y = 0
+		joybutton.tid = 0
+		joybutton.x = 0
+		joybutton.y = 0
 
 	}
 	if isstillpress {
-		touchStr = touchStr + "\n" + "FIRE PRESS"
+		touchStr = touchStr + "\n" + "FIRE PRESS - " + strconv.Itoa(joybutton.tid)
 	}
 	return isstillpress
 }
@@ -294,7 +296,14 @@ func (g *Game) Update() error {
 
 	CalcBallPosition()
 	xx, yy := GetJoyTouchXY()
-	GetJoyButton()
+	if GetJoyButton() {
+		explosion2 = NewSprite()
+		explosion2.AddAnimationByte("default", &gfx.EXPLOSION2, 500, 7, ebiten.FilterNearest)
+		explosion2.Position(explosion3.X, explosion3.Y)
+		explosion2.Start()
+
+		sps = append(sps, explosion2)
+	}
 	// r = r + 0.1
 	explosion3.X = explosion3.X + xx
 	explosion3.Y = explosion3.Y + yy
@@ -334,6 +343,10 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 	explosion3.Draw(screen)
 	explosion2.Draw(screen)
+
+	for _, j := range sps {
+		j.Draw(screen)
+	}
 	joytouch.DrawBorders(screen, color.White)
 	joybutton.DrawBorders(screen, color.White)
 

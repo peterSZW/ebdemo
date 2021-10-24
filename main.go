@@ -2,6 +2,8 @@ package main
 
 import (
 	"log"
+	"os"
+	"runtime/pprof"
 
 	"github.com/peterSZW/ebdemo/ebgame"
 
@@ -9,6 +11,14 @@ import (
 )
 
 func main() {
+
+	f, err := os.Create("cpu.pprof")
+	if err != nil {
+		log.Fatal(err)
+	}
+	pprof.StartCPUProfile(f)
+	defer pprof.StopCPUProfile()
+
 	game := &ebgame.Game{}
 	// w := 1024
 	// h := 768
@@ -22,4 +32,11 @@ func main() {
 	if err := ebiten.RunGame(game); err != nil {
 		log.Fatal(err)
 	}
+
+	f2, err := os.Create("mem.pprof")
+	if err != nil {
+		log.Fatal(err)
+	}
+	pprof.WriteHeapProfile(f2)
+	f2.Close()
 }

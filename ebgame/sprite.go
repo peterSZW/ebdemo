@@ -718,6 +718,18 @@ func (sprite *Sprite) ToogleAnimation() {
 		sprite.Resume()
 	}
 }
+func (sprite *Sprite) Step(i int) {
+	currentAnimation := sprite.Animations[sprite.CurrentAnimation]
+	if i < 0 {
+		i = 0
+	}
+	if i >= currentAnimation.Steps {
+		i = 0
+	}
+	currentAnimation.CurrentStep = i
+	return
+
+}
 
 /*
 NextStep go to the next step of animation

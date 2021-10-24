@@ -34,9 +34,13 @@ var joytouch JoyTouch
 var joybutton JoyButton
 
 var sps []*Sprite
+var sps2 []*Sprite
+var spList map[string]*Sprite
+var spCount int
 
 //初始化
 func init() {
+	spList = make(map[string]*Sprite)
 
 	pointerImage.Fill(color.RGBA{0xff, 0, 0, 0xff})
 
@@ -119,6 +123,26 @@ func limiXY(x, y float64) (float64, float64) {
 	return x, y
 }
 
+func GetKeyBoardSpace() bool {
+	return ebiten.IsKeyPressed(ebiten.KeySpace)
+}
+func GetKeyBoard() (xx, yy float64) {
+	xx = 0
+	yy = 0
+	if ebiten.IsKeyPressed(ebiten.KeyRight) {
+		xx = 5
+	}
+	if ebiten.IsKeyPressed(ebiten.KeyLeft) {
+		xx = -5
+	}
+	if ebiten.IsKeyPressed(ebiten.KeyDown) {
+		yy = 5
+	}
+	if ebiten.IsKeyPressed(ebiten.KeyUp) {
+		yy = -5
+	}
+	return
+}
 func GetJoyTouchXY() (xx, yy float64) {
 	touchStr = ""
 
@@ -197,9 +221,45 @@ func GetJoyTouchXY() (xx, yy float64) {
 	if isstillpress {
 		touchStr = touchStr + "\n" + "STILL PRESS"
 	}
+
 	return xx, yy
 }
 
+func GetDirectByXY(xx, yy float64) int {
+	// 7 8 1
+	// 6 0 2
+	// 5 4 3
+	if xx == 0 && yy == 0 {
+		return 0
+	}
+
+	if xx > 0 && yy < 0 {
+		return 1
+	}
+	if xx > 0 && yy == 0 {
+		return 2
+	}
+	if xx > 0 && yy > 0 {
+		return 3
+	}
+	if xx == 0 && yy > 0 {
+		return 4
+	}
+	if xx < 0 && yy > 0 {
+		return 5
+	}
+
+	if xx < 0 && yy == 0 {
+		return 6
+	}
+	if xx < 0 && yy < 0 {
+		return 7
+	}
+	if xx == 0 && yy < 0 {
+		return 8
+	}
+	return 0
+}
 func GetJoyButton() bool {
 
 	touches := ebiten.TouchIDs()
@@ -285,35 +345,73 @@ func CalcBallPosition() {
 }
 
 var isFirstUpdate = true
+var lastBulletTime time.Time
 
 //循环计算
 func (g *Game) Update() error {
+	//第一次设置
 	if isFirstUpdate {
 		joytouch.SetWH(screenSize.X, screenSize.Y)
 		joybutton.SetWH(screenSize.X, screenSize.Y)
 		isFirstUpdate = false
 	}
 
+	//计算小球位置
 	CalcBallPosition()
-	xx, yy := GetJoyTouchXY()
-	if GetJoyButton() {
-		explosion2 = NewSprite()
-		explosion2.AddAnimationByte("default", &gfx.EXPLOSION2, 500, 7, ebiten.FilterNearest)
-		explosion2.Position(explosion3.X, explosion3.Y)
-		explosion2.Start()
 
-		sps = append(sps, explosion2)
+	//移动飞机
+	xx, yy := GetJoyTouchXY()
+	if xx == 0 && yy == 0 {
+		xx, yy = GetKeyBoard()
 	}
-	// r = r + 0.1
+	explosion3.Pause()
+	if GetDirectByXY(xx, yy) > 0 {
+		explosion3.Step(GetDirectByXY(xx, yy))
+
+	}
+
 	explosion3.X = explosion3.X + xx
 	explosion3.Y = explosion3.Y + yy
-
 	explosion3.X, explosion3.Y = limiXY(explosion3.X, explosion3.Y)
 
+	//生成子弹
+	if GetJoyButton() || GetKeyBoardSpace() {
+		if time.Now().Sub(lastBulletTime) > time.Duration(100*time.Millisecond) {
+			lastBulletTime = time.Now()
+			newsprite := NewSprite()
+			newsprite.AddAnimationByte("default", &gfx.EXPLOSION2, 500, 7, ebiten.FilterNearest)
+			newsprite.Position(explosion3.X, explosion3.Y)
+			newsprite.Start()
+			newsprite.AddEffect(&EffectOptions{Effect: Zoom, Zoom: 3, Duration: 6000, Repeat: false, GoBack: true})
+
+			spCount++
+
+			spList[strconv.Itoa(spCount)] = newsprite
+			//sps = append(sps, newsprite)
+
+		}
+	}
+	//删除越界的对象
+	for k, j := range spList {
+		//for j := spList.Front(); j != nil; j = j.Next() {
+
+		j.Y = j.Y - 5
+		if j.Y < -20 {
+			j.Hide()
+
+			delete(spList, k)
+
+			//spList[k] = nil
+			//Remove(j)
+		}
+	}
+
+	//生成字符串
 	touchStr = touchStr + "\n" + fmt.Sprintf("[%f,%f]", xx, yy)
 	touchStr = touchStr + "\n" + fmt.Sprintf("[%d,%d]", joytouch.x, joytouch.y)
 	touchStr = touchStr + "\n" + fmt.Sprintf("[%d]", joytouch.tid)
 
+	//延迟0.01毫秒
 	time.Sleep(10 * time.Millisecond)
 	return nil
 }
@@ -344,7 +442,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	explosion3.Draw(screen)
 	explosion2.Draw(screen)
 
-	for _, j := range sps {
+	for _, j := range spList {
 		j.Draw(screen)
 	}
 	joytouch.DrawBorders(screen, color.White)

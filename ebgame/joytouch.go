@@ -25,9 +25,9 @@ func (this *JoyTouch) SetWH(w, h int) {
 	if h > w {
 		this.width = w
 		this.height = h
-		this.rect.x = 0
+		this.rect.x = 0 + 10
 		this.rect.w = w / 2
-		this.rect.y = h - w/2
+		this.rect.y = h - w/2 - 10
 		this.rect.h = w / 2
 	} else {
 		this.width = w

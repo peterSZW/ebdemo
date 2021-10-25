@@ -1,6 +1,7 @@
 package ebgame
 
 import (
+	"fmt"
 	"image/color"
 	"math"
 
@@ -81,4 +82,88 @@ func (this *JoyTouch) DrawBorders(surface *ebiten.Image, c color.Color) {
 	ebitenutil.DrawLine(surface, x, y1, x1, y1, c) // bottom
 	ebitenutil.DrawLine(surface, x, y, x, y1, c)   // left
 	ebitenutil.DrawLine(surface, x1, y, x1, y1, c) // right
+}
+
+//==================
+
+func (this *JoyTouch) GetJoyTouchXY() (xx, yy float64) {
+	touchStr = ""
+
+	touches := ebiten.TouchIDs()
+
+	isstillpress := false
+
+	xx = 0.
+	yy = 0.
+	if len(touches) > 0 {
+
+		if this.tid != 0 {
+			//alread have last press, so we need to find is this touch still on screen
+			id := touches[0]
+			for _, id = range touches {
+				if int(id) == int(this.GetTid()) {
+					isstillpress = true
+					break
+
+				}
+			}
+
+			if isstillpress {
+				x, y := ebiten.TouchPosition(id)
+
+				xx, yy = this.Move(x, y)
+			} else {
+				this.tid = 0
+				this.x = 0
+				this.y = 0
+				//find new press
+
+				for _, id := range touches {
+
+					x, y := ebiten.TouchPosition(id)
+
+					if this.Press(x, y, int(id)) {
+						isstillpress = true
+						break
+					}
+
+				}
+
+			}
+
+		} else {
+			//find new press
+
+			for _, id := range touches {
+				x, y := ebiten.TouchPosition(id)
+				if this.Press(x, y, int(id)) {
+					isstillpress = true
+
+					break
+				}
+
+			}
+
+		}
+
+		for _, id := range touches {
+
+			x, y := ebiten.TouchPosition(id)
+
+			touchStr = touchStr + "\n" + fmt.Sprintf("(%d,%d)", x, y)
+		}
+
+	} else {
+		//all reased
+		this.tid = 0
+		this.x = 0
+		this.y = 0
+		xx = 0
+		yy = 0
+	}
+	if isstillpress {
+		touchStr = touchStr + "\n" + "STILL PRESS"
+	}
+
+	return xx, yy
 }

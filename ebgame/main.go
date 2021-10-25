@@ -33,8 +33,6 @@ var (
 var joytouch JoyTouch
 var joybutton JoyButton
 
-var sps []*Sprite
-var sps2 []*Sprite
 var spList map[string]*Sprite
 var spCount int
 
@@ -143,88 +141,6 @@ func GetKeyBoard() (xx, yy float64) {
 	}
 	return
 }
-func GetJoyTouchXY() (xx, yy float64) {
-	touchStr = ""
-
-	touches := ebiten.TouchIDs()
-
-	isstillpress := false
-
-	xx = 0.
-	yy = 0.
-	if len(touches) > 0 {
-
-		if joytouch.tid != 0 {
-			//alread have last press, so we need to find is this touch still on screen
-			id := touches[0]
-			for _, id = range touches {
-				if int(id) == int(joytouch.GetTid()) {
-					isstillpress = true
-					break
-
-				}
-			}
-
-			if isstillpress {
-				x, y := ebiten.TouchPosition(id)
-
-				xx, yy = joytouch.Move(x, y)
-			} else {
-				joytouch.tid = 0
-				joytouch.x = 0
-				joytouch.y = 0
-				//find new press
-
-				for _, id := range touches {
-
-					x, y := ebiten.TouchPosition(id)
-
-					if joytouch.Press(x, y, int(id)) {
-						isstillpress = true
-						break
-					}
-
-				}
-
-			}
-
-		} else {
-			//find new press
-
-			for _, id := range touches {
-				x, y := ebiten.TouchPosition(id)
-				if joytouch.Press(x, y, int(id)) {
-					isstillpress = true
-
-					break
-				}
-
-			}
-
-		}
-
-		for _, id := range touches {
-
-			x, y := ebiten.TouchPosition(id)
-
-			touchStr = touchStr + "\n" + fmt.Sprintf("(%d,%d)", x, y)
-		}
-
-	} else {
-		//all reased
-		joytouch.tid = 0
-		joytouch.x = 0
-		joytouch.y = 0
-		xx = 0
-		yy = 0
-	}
-	if isstillpress {
-		touchStr = touchStr + "\n" + "STILL PRESS"
-	}
-
-	return xx, yy
-}
-
 func GetDirectByXY(xx, yy float64) int {
 	// 7 8 1
 	// 6 0 2
@@ -259,70 +175,6 @@ func GetDirectByXY(xx, yy float64) int {
 		return 8
 	}
 	return 0
-}
-func GetJoyButton() bool {
-
-	touches := ebiten.TouchIDs()
-
-	isstillpress := false
-
-	if len(touches) > 0 {
-
-		if joybutton.tid != 0 {
-			//alread have last press, so we need to find is this touch still on screen
-			id := touches[0]
-			for _, id = range touches {
-				if int(id) == int(joybutton.GetTid()) {
-					isstillpress = true
-					break
-
-				}
-			}
-
-			if isstillpress {
-
-			} else {
-				joybutton.tid = 0
-
-				for _, id := range touches {
-
-					x, y := ebiten.TouchPosition(id)
-
-					if joybutton.Press(x, y, int(id)) {
-						isstillpress = true
-						break
-					}
-
-				}
-
-			}
-
-		} else {
-			//find new press
-
-			for _, id := range touches {
-				x, y := ebiten.TouchPosition(id)
-				if joybutton.Press(x, y, int(id)) {
-					isstillpress = true
-
-					break
-				}
-
-			}
-
-		}
-
-	} else {
-		//all reased
-		joybutton.tid = 0
-		joybutton.x = 0
-		joybutton.y = 0
-
-	}
-	if isstillpress {
-		touchStr = touchStr + "\n" + "FIRE PRESS - " + strconv.Itoa(joybutton.tid)
-	}
-	return isstillpress
 }
 func CalcBallPosition() {
 	x = x + xxx
@@ -360,7 +212,7 @@ func (g *Game) Update() error {
 	CalcBallPosition()
 
 	//移动飞机
-	xx, yy := GetJoyTouchXY()
+	xx, yy := joytouch.GetJoyTouchXY()
 	if xx == 0 && yy == 0 {
 		xx, yy = GetKeyBoard()
 	}
@@ -375,7 +227,7 @@ func (g *Game) Update() error {
 	explosion3.X, explosion3.Y = limiXY(explosion3.X, explosion3.Y)
 
 	//生成子弹
-	if GetJoyButton() || GetKeyBoardSpace() {
+	if joybutton.GetJoyButton() || GetKeyBoardSpace() {
 		if time.Now().Sub(lastBulletTime) > time.Duration(100*time.Millisecond) {
 			lastBulletTime = time.Now()
 			newsprite := NewSprite()

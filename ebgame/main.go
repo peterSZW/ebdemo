@@ -14,24 +14,23 @@ import (
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
-	"github.com/peterSZW/ebdemo/ebgame/gfx"
 	"github.com/peterSZW/ebdemo/ebgame/resources/images"
+	"github.com/peterSZW/go-sprite/example/gfx"
 )
 
-var img *ebiten.Image
 var screenSize image.Point
-var pointerImage = ebiten.NewImage(8, 8)
 
 var home string
 var curpath string
 var errstr string
 
 var (
-	explosion1, explosion2, explosion3 *Sprite
+	robot *Sprite
 )
 
 var joytouch JoyTouch
-var joybutton JoyButton
+var joybutton1 JoyButton
+var joybutton2 JoyButton
 
 var spList map[string]*Sprite
 var spCount int
@@ -39,11 +38,6 @@ var spCount int
 //初始化
 func init() {
 	spList = make(map[string]*Sprite)
-
-	pointerImage.Fill(color.RGBA{0xff, 0, 0, 0xff})
-
-	xxx = 5
-	yyy = 5
 
 	home = os.Getenv("HOME")
 	curpath = getCurrentDirectory()
@@ -61,18 +55,12 @@ func init() {
 
 	}
 
-	explosion2 = NewSprite()
-	//	explosion3.AddAnimationByte("default", &gfx.EXPLOSION3, 500, 9, ebiten.FilterNearest)
-	explosion2.AddAnimationByte("default", &gfx.EXPLOSION2, 500, 7, ebiten.FilterNearest)
+	robot = NewSprite()
+	robot.AddAnimationByte("default", &images.E_ROBO2, 2000, 8, ebiten.FilterNearest)
+	robot.Position(300-10-48, 400/3*2)
+	robot.CenterCoordonnates = true
 
-	//explosion3.AddAnimation("default", "gfx/explosion3.png", explosionDuration, 9, ebiten.FilterNearest)
-	explosion2.Position(240-10-48, 400/3*2)
-	explosion2.Start()
-
-	explosion3 = NewSprite()
-	explosion3.AddAnimationByte("default", &images.E_ROBO2, 2000, 8, ebiten.FilterNearest)
-	explosion3.Position(300-10-48, 400/3*2)
-	explosion3.Start()
+	robot.Start()
 
 }
 
@@ -91,12 +79,6 @@ func file_exist(path string) bool {
 
 type Game struct{}
 
-var x float64
-var y float64
-var xxx float64
-var yyy float64
-
-var r float64
 var touchStr string
 
 const (
@@ -176,25 +158,6 @@ func GetDirectByXY(xx, yy float64) int {
 	}
 	return 0
 }
-func CalcBallPosition() {
-	x = x + xxx
-	y = y + yyy
-
-	if x > float64(screenSize.X)-2.0 {
-		xxx = -5
-	}
-
-	if x < 0 {
-		xxx = 5
-	}
-
-	if y > float64(screenSize.Y)-2.0 {
-		yyy = -5
-	}
-	if y < 0 {
-		yyy = 5
-	}
-}
 
 var isFirstUpdate = true
 var lastBulletTime time.Time
@@ -204,57 +167,71 @@ func (g *Game) Update() error {
 	//第一次设置
 	if isFirstUpdate {
 		joytouch.SetWH(screenSize.X, screenSize.Y)
-		joybutton.SetWH(screenSize.X, screenSize.Y)
+		joybutton1.SetWH(screenSize.X, screenSize.Y)
+		joybutton1.rect.x = joybutton1.rect.x - 35
+		joybutton2.SetWH(screenSize.X, screenSize.Y)
+		joybutton2.rect.x = joybutton2.rect.x + 35
 		isFirstUpdate = false
 	}
-
-	//计算小球位置
-	CalcBallPosition()
 
 	//移动飞机
 	xx, yy := joytouch.GetJoyTouchXY()
 	if xx == 0 && yy == 0 {
 		xx, yy = GetKeyBoard()
 	}
-	explosion3.Pause()
+	robot.Pause()
 	if GetDirectByXY(xx, yy) > 0 {
-		explosion3.Step(GetDirectByXY(xx, yy))
+		robot.Step(GetDirectByXY(xx, yy))
 
 	}
 
-	explosion3.X = explosion3.X + xx
-	explosion3.Y = explosion3.Y + yy
-	explosion3.X, explosion3.Y = limiXY(explosion3.X, explosion3.Y)
+	robot.X = robot.X + xx
+	robot.Y = robot.Y + yy
+	robot.X, robot.Y = limiXY(robot.X, robot.Y)
 
 	//生成子弹
-	if joybutton.GetJoyButton() || GetKeyBoardSpace() {
+	if joybutton1.GetJoyButton() || GetKeyBoardSpace() {
 		if time.Now().Sub(lastBulletTime) > time.Duration(100*time.Millisecond) {
 			lastBulletTime = time.Now()
+
 			newsprite := NewSprite()
+			//newsprite.AddAnimationByte("default", &images.MISSILE, 2000, 8, ebiten.FilterNearest)
 			newsprite.AddAnimationByte("default", &gfx.EXPLOSION2, 500, 7, ebiten.FilterNearest)
-			newsprite.Position(explosion3.X, explosion3.Y)
-			newsprite.Start()
+			newsprite.Position(robot.X, robot.Y)
 			newsprite.AddEffect(&EffectOptions{Effect: Zoom, Zoom: 3, Duration: 6000, Repeat: false, GoBack: true})
+			newsprite.CenterCoordonnates = true
+			newsprite.Start()
 
 			spCount++
 
 			spList[strconv.Itoa(spCount)] = newsprite
-			//sps = append(sps, newsprite)
+		}
+	}
+
+	if joybutton2.GetJoyButton() {
+		if time.Now().Sub(lastBulletTime) > time.Duration(100*time.Millisecond) {
+			lastBulletTime = time.Now()
+
+			newsprite := NewSprite()
+			newsprite.AddAnimationByte("default", &gfx.EXPLOSION3, 500, 9, ebiten.FilterNearest)
+			newsprite.Position(robot.X, robot.Y)
+			newsprite.AddEffect(&EffectOptions{Effect: Zoom, Zoom: 3, Duration: 6000, Repeat: false, GoBack: true})
+			newsprite.CenterCoordonnates = true
+			newsprite.Start()
+
+			spCount++
+
+			spList[strconv.Itoa(spCount)] = newsprite
 
 		}
 	}
+
 	//删除越界的对象
 	for k, j := range spList {
-		//for j := spList.Front(); j != nil; j = j.Next() {
-
 		j.Y = j.Y - 5
 		if j.Y < -20 {
 			j.Hide()
-
 			delete(spList, k)
-
-			//spList[k] = nil
-			//Remove(j)
 		}
 	}
 
@@ -276,30 +253,17 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	s := fmt.Sprintf("\n\n\n%s\n%s\nFPS : %f %d %d\n%v\n%s\n%s\n%s",
 		curpath, home, ebiten.CurrentFPS(), mx, my,
 		file_exist(home+"/Library/Caches/output3.txt"), errstr, runtime.GOOS, touchStr)
-
 	ebitenutil.DebugPrint(screen, s)
 
-	//画图
-	// op.GeoM.Rotate(r)
+	joytouch.DrawBorders(screen, color.Gray16{0x2222})
+	joybutton1.DrawBorders(screen, color.Gray16{0x1111})
+	joybutton2.DrawBorders(screen, color.Gray16{0x1111})
 
-	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Translate(x, y)
-	//op.GeoM.Scale(0.5, 0.5)
-
-	screen.DrawImage(pointerImage, op)
-	op = &ebiten.DrawImageOptions{}
-	op.GeoM.Translate(x+10, y)
-	screen.DrawImage(pointerImage, op)
-
-	explosion3.Draw(screen)
-	explosion2.Draw(screen)
+	robot.Draw(screen)
 
 	for _, j := range spList {
 		j.Draw(screen)
 	}
-	joytouch.DrawBorders(screen, color.White)
-	joybutton.DrawBorders(screen, color.White)
-
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {

@@ -2,7 +2,6 @@ package ebgame
 
 import (
 	"image/color"
-	"math"
 	"strconv"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -66,23 +65,23 @@ func (this *JoyButton) Press(x, y int, tid int) bool {
 	return false
 }
 
-func (this *JoyButton) Move(x, y int) (xx float64, yy float64) {
+// func (this *JoyButton) Move(x, y int) (xx float64, yy float64) {
 
-	xx = 0
-	yy = 0
-	dis := math.Sqrt(float64((x-this.x)*(x-this.x) + (y-this.y)*(y-this.y)))
+// 	xx = 0
+// 	yy = 0
+// 	dis := math.Sqrt(float64((x-this.x)*(x-this.x) + (y-this.y)*(y-this.y)))
 
-	// if dis > 0 {
-	// 	xx = float64(x-this.x) / dis
-	// 	yy = float64(y-this.y) / dis
-	// }
-	if dis > 0 {
-		xx = float64(x-this.x) / dis * 5
-		yy = float64(y-this.y) / dis * 5
-	}
-	return
+// 	// if dis > 0 {
+// 	// 	xx = float64(x-this.x) / dis
+// 	// 	yy = float64(y-this.y) / dis
+// 	// }
+// 	if dis > 0 {
+// 		xx = float64(x-this.x) / dis * 5
+// 		yy = float64(y-this.y) / dis * 5
+// 	}
+// 	return
 
-}
+// }
 
 func (this *JoyButton) DrawBorders(surface *ebiten.Image, c color.Color) {
 	var x, y, x1, y1 float64

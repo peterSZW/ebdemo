@@ -123,6 +123,8 @@ type Animation struct {
 
 	// Number of steps for the total animation
 	Steps int
+	cols  int
+	rows  int
 
 	// Current step displayed
 	CurrentStep int
@@ -234,8 +236,10 @@ func NewSprite() *Sprite {
 	sprite.Alpha = 1
 	return sprite
 }
-
 func newAnimationByte(rawImage *[]byte, duration int, steps int, filter ebiten.Filter) *Animation {
+	return newAnimationByteCol(rawImage, duration, 1, steps, filter)
+}
+func newAnimationByteCol(rawImage *[]byte, duration int, row int, col int, filter ebiten.Filter) *Animation {
 	var err error
 	animation := new(Animation)
 	animation.Path = ""
@@ -249,13 +253,16 @@ func newAnimationByte(rawImage *[]byte, duration int, steps int, filter ebiten.F
 	}
 
 	animation.Image = ebiten.NewImageFromImage(img)
-
+	steps := row * col
+	animation.cols = col
+	animation.rows = row
 	animation.Steps = steps
 	animation.Duration = time.Millisecond * time.Duration(duration)
 
 	width, height := animation.Image.Size()
-	animation.StepWidth = width / animation.Steps
-	animation.StepHeight = height
+	animation.StepWidth = width / col
+	//animation.Steps
+	animation.StepHeight = height / row
 
 	animation.currentStepTimeStart = time.Now()
 	animation.OneStepDuration = time.Duration(int(animation.Duration) / animation.Steps)
@@ -287,6 +294,9 @@ mySprite.AddAnimation("walk-right",	"walk_right.png", 700, 6, ebiten.FilterNeare
 
 func (sprite *Sprite) AddAnimationByte(label string, rawImage *[]byte, duration int, steps int, filter ebiten.Filter) {
 	sprite.Animations[label] = newAnimationByte(rawImage, duration, steps, filter)
+}
+func (sprite *Sprite) AddAnimationByteCol(label string, rawImage *[]byte, duration int, rows int, cols int, filter ebiten.Filter) {
+	sprite.Animations[label] = newAnimationByteCol(rawImage, duration, rows, cols, filter)
 }
 
 /*
@@ -625,9 +635,21 @@ func (sprite *Sprite) Draw(surface *ebiten.Image) {
 		options.ColorM.Scale(sprite.Red, sprite.Green, sprite.Blue, sprite.Alpha)
 
 		// Choose current image inside animation
-		x0 := currentAnimation.CurrentStep * currentAnimation.StepWidth
+		col := currentAnimation.CurrentStep % currentAnimation.cols
+		row := currentAnimation.CurrentStep / currentAnimation.cols
+
+		x0 := col * currentAnimation.StepWidth
 		x1 := x0 + currentAnimation.StepWidth
-		r := image.Rect(x0, 0, x1, currentAnimation.StepHeight)
+		y0 := row * currentAnimation.StepWidth
+		y1 := y0 + currentAnimation.StepWidth
+		//fmt.Println(x0, x1, y0, y1, col, row, currentAnimation.rows, currentAnimation.cols, currentAnimation.CurrentStep)
+
+		r := image.Rect(x0, y0, x1, y1)
+
+		//x0 := currentAnimation.CurrentStep * currentAnimation.StepWidth
+		//x1 := x0 + currentAnimation.StepWidth
+		//r := image.Rect(x0, 0, x1, currentAnimation.StepHeight)
+
 		//options.  = &r
 
 		// op := &ebiten.DrawImageOptions{}
@@ -718,7 +740,13 @@ func (sprite *Sprite) ToogleAnimation() {
 		sprite.Resume()
 	}
 }
-func (sprite *Sprite) Step(i int) {
+
+func (sprite *Sprite) GetStep() int {
+	currentAnimation := sprite.Animations[sprite.CurrentAnimation]
+
+	return currentAnimation.CurrentStep
+}
+func (sprite *Sprite) Step(i int) int {
 	currentAnimation := sprite.Animations[sprite.CurrentAnimation]
 	if i < 0 {
 		i = 0
@@ -727,7 +755,8 @@ func (sprite *Sprite) Step(i int) {
 		i = 0
 	}
 	currentAnimation.CurrentStep = i
-	return
+	//fmt.Println(i, currentAnimation.Steps)
+	return i
 
 }
 

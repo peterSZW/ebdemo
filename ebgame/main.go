@@ -14,8 +14,8 @@ import (
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
+	"github.com/peterSZW/ebdemo/ebgame/gfx"
 	"github.com/peterSZW/ebdemo/ebgame/resources/images"
-	"github.com/peterSZW/go-sprite/example/gfx"
 )
 
 var screenSize image.Point
@@ -195,11 +195,15 @@ func (g *Game) Update() error {
 			lastBulletTime = time.Now()
 
 			newsprite := NewSprite()
-			//newsprite.AddAnimationByte("default", &images.MISSILE, 2000, 8, ebiten.FilterNearest)
+			//newsprite.AddAnimationByteCol("default", &images.RASER1, 2000, 4, 6, ebiten.FilterNearest)
 			newsprite.AddAnimationByte("default", &gfx.EXPLOSION2, 500, 7, ebiten.FilterNearest)
 			newsprite.Position(robot.X, robot.Y)
 			newsprite.AddEffect(&EffectOptions{Effect: Zoom, Zoom: 3, Duration: 6000, Repeat: false, GoBack: true})
 			newsprite.CenterCoordonnates = true
+
+			newsprite.Direction = float64(2-robot.GetStep()) * 45
+
+			newsprite.Speed = 7
 			newsprite.Start()
 
 			spCount++
@@ -208,16 +212,21 @@ func (g *Game) Update() error {
 		}
 	}
 
-	if joybutton2.GetJoyButton() {
+	if joybutton2.GetJoyButton() || ebiten.IsKeyPressed(ebiten.Key1) {
 		if time.Now().Sub(lastBulletTime) > time.Duration(100*time.Millisecond) {
 			lastBulletTime = time.Now()
 
 			newsprite := NewSprite()
-			newsprite.AddAnimationByte("default", &gfx.EXPLOSION3, 500, 9, ebiten.FilterNearest)
+			//newsprite.AddAnimationByte("default", &gfx.EXPLOSION3, 500, 9, ebiten.FilterNearest)
+			newsprite.AddAnimationByteCol("default", &images.RASER1, 200, 4, 6, ebiten.FilterNearest)
 			newsprite.Position(robot.X, robot.Y)
-			newsprite.AddEffect(&EffectOptions{Effect: Zoom, Zoom: 3, Duration: 6000, Repeat: false, GoBack: true})
+			//newsprite.AddEffect(&EffectOptions{Effect: Zoom, Zoom: 3, Duration: 6000, Repeat: false, GoBack: true})
 			newsprite.CenterCoordonnates = true
-			newsprite.Start()
+			newsprite.Pause()
+			newsprite.Step(18)
+			newsprite.Speed = 1
+
+			//newsprite.Start()
 
 			spCount++
 
@@ -228,8 +237,8 @@ func (g *Game) Update() error {
 
 	//删除越界的对象
 	for k, j := range spList {
-		j.Y = j.Y - 5
-		if j.Y < -20 {
+		//j.Y = j.Y - 5
+		if (j.Y < -20) || (j.X < -10) || (j.X > 800) || (j.Y > 800) {
 			j.Hide()
 			delete(spList, k)
 		}

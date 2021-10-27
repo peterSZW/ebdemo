@@ -5,6 +5,7 @@ import (
 	"image"
 	"image/color"
 	_ "image/png"
+	"math"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -123,10 +124,28 @@ func GetKeyBoard() (xx, yy float64) {
 	}
 	return
 }
+
+func GetDegreeByXY(xx, yy float64) float64 {
+
+	// 45  0  315
+	// 90  0  270
+	// 45 180 225
+	if yy == 0 && xx == 0 {
+		return 0
+	}
+	deg := 180 - math.Atan2(yy, xx)/math.Pi*180
+	if deg < 270 {
+		deg = deg + 90
+	} else {
+		deg = deg - 270
+	}
+	return deg
+}
 func GetDirectByXY(xx, yy float64) int {
 	// 7 8 1
 	// 6 0 2
 	// 5 4 3
+
 	if xx == 0 && yy == 0 {
 		return 0
 	}
@@ -161,6 +180,8 @@ func GetDirectByXY(xx, yy float64) int {
 
 var isFirstUpdate = true
 var lastBulletTime time.Time
+var lastLaserTime time.Time
+var degree float64
 
 //循环计算
 func (g *Game) Update() error {
@@ -175,19 +196,33 @@ func (g *Game) Update() error {
 	}
 
 	//移动飞机
-	xx, yy := joytouch.GetJoyTouchXY()
+	xx, yy, _ := joytouch.GetJoyTouchXY()
+
 	if xx == 0 && yy == 0 {
 		xx, yy = GetKeyBoard()
 	}
 	robot.Pause()
 	if GetDirectByXY(xx, yy) > 0 {
 		robot.Step(GetDirectByXY(xx, yy))
-
+		degree = GetDegreeByXY(xx, yy)
 	}
+
+	// if ispress {
+	// 	robot.Step(GetDirectByXY(xx, yy))
+
+	// }
 
 	robot.X = robot.X + xx
 	robot.Y = robot.Y + yy
 	robot.X, robot.Y = limiXY(robot.X, robot.Y)
+
+	if ebiten.IsKeyPressed(ebiten.KeyQ) {
+		robot.Angle = robot.Angle + 10
+	}
+
+	if ebiten.IsKeyPressed(ebiten.KeyW) {
+		robot.Angle = robot.Angle - 10
+	}
 
 	//生成子弹
 	if joybutton1.GetJoyButton() || GetKeyBoardSpace() {
@@ -201,9 +236,10 @@ func (g *Game) Update() error {
 			newsprite.AddEffect(&EffectOptions{Effect: Zoom, Zoom: 3, Duration: 6000, Repeat: false, GoBack: true})
 			newsprite.CenterCoordonnates = true
 
-			newsprite.Direction = float64(2-robot.GetStep()) * 45
+			newsprite.Direction = degree + 90 //GetDegreeByXY(xx, yy) + 90
+			//float64(2-robot.GetStep()) * 45
 
-			newsprite.Speed = 7
+			newsprite.Speed = 5
 			newsprite.Start()
 
 			spCount++
@@ -213,8 +249,8 @@ func (g *Game) Update() error {
 	}
 
 	if joybutton2.GetJoyButton() || ebiten.IsKeyPressed(ebiten.Key1) {
-		if time.Now().Sub(lastBulletTime) > time.Duration(100*time.Millisecond) {
-			lastBulletTime = time.Now()
+		if time.Now().Sub(lastLaserTime) > time.Duration(50*time.Millisecond) {
+			lastLaserTime = time.Now()
 
 			newsprite := NewSprite()
 			//newsprite.AddAnimationByte("default", &gfx.EXPLOSION3, 500, 9, ebiten.FilterNearest)
@@ -224,7 +260,9 @@ func (g *Game) Update() error {
 			newsprite.CenterCoordonnates = true
 			newsprite.Pause()
 			newsprite.Step(18)
-			newsprite.Speed = 1
+			newsprite.Speed = 8
+			newsprite.Angle = degree          //+90 GetDegreeByXY(xx, yy)
+			newsprite.Direction = degree + 90 // GetDegreeByXY(xx, yy) + 90
 
 			//newsprite.Start()
 
@@ -248,6 +286,8 @@ func (g *Game) Update() error {
 	touchStr = touchStr + "\n" + fmt.Sprintf("[%f,%f]", xx, yy)
 	touchStr = touchStr + "\n" + fmt.Sprintf("[%d,%d]", joytouch.x, joytouch.y)
 	touchStr = touchStr + "\n" + fmt.Sprintf("[%d]", joytouch.tid)
+	touchStr = touchStr + "\n" + fmt.Sprintf("[%f]", robot.Angle)
+	touchStr = touchStr + "\n" + fmt.Sprintf("[%f]", GetDegreeByXY(xx, yy))
 
 	//延迟0.01毫秒
 	time.Sleep(10 * time.Millisecond)

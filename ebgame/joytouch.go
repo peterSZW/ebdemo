@@ -86,12 +86,12 @@ func (this *JoyTouch) DrawBorders(surface *ebiten.Image, c color.Color) {
 
 //==================
 
-func (this *JoyTouch) GetJoyTouchXY() (xx, yy float64) {
+func (this *JoyTouch) GetJoyTouchXY() (xx float64, yy float64, isstillpress bool) {
 	touchStr = ""
 
 	touches := ebiten.TouchIDs()
 
-	isstillpress := false
+	isstillpress = false
 
 	xx = 0.
 	yy = 0.
@@ -165,5 +165,5 @@ func (this *JoyTouch) GetJoyTouchXY() (xx, yy float64) {
 		touchStr = touchStr + "\n" + "STILL PRESS"
 	}
 
-	return xx, yy
+	return xx, yy, isstillpress
 }

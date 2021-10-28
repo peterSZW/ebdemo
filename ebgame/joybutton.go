@@ -24,14 +24,21 @@ func isInRect(x int, y int, r Rect) bool {
 }
 
 type JoyButton struct {
-	x      int
-	y      int
-	width  int
-	height int
-	rect   Rect
-	tid    int
+	x       int
+	y       int
+	width   int
+	height  int
+	rect    Rect
+	tid     int
+	clicked bool
 }
 
+func (this *JoyButton) GetClicked() bool {
+	v := this.clicked
+
+	this.clicked = false
+	return v
+}
 func (this *JoyButton) GetTid() int {
 	return this.tid
 }
@@ -60,6 +67,7 @@ func (this *JoyButton) Press(x, y int, tid int) bool {
 		this.tid = tid
 		this.x = x
 		this.y = y
+		this.clicked = true
 		return true
 	}
 	return false

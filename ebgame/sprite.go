@@ -60,6 +60,7 @@ var violet = color.RGBA{R: 255, G: 0, B: 255, A: 255}
 
 /*Sprite contains the sprite, animations and effects */
 type Sprite struct {
+	Name string
 	// Animation label currently displayed
 	CurrentAnimation string
 
@@ -503,6 +504,14 @@ func (sprite *Sprite) move(options *EffectOptions) {
 	options.loopCounter++
 }
 
+func (sprite *Sprite) GetY() float64 {
+	return sprite.Y
+}
+
+func (sprite *Sprite) GetX() float64 {
+	return sprite.X
+}
+
 //GetWidth returns width of the current animation displayed
 func (sprite *Sprite) GetWidth() float64 {
 	currentAnimation := sprite.Animations[sprite.CurrentAnimation]
@@ -788,6 +797,10 @@ func (sprite *Sprite) NextStep() bool {
 		}
 	}
 	return false
+}
+func (sprite *Sprite) GetCollisionBox() []*Box {
+	return boxData[sprite.Name]
+
 }
 
 func (sprite *Sprite) applyEffects(surface *ebiten.Image) {

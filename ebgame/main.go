@@ -17,6 +17,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/peterSZW/ebdemo/ebgame/gfx"
+	"github.com/peterSZW/ebdemo/ebgame/paint"
 	"github.com/peterSZW/ebdemo/ebgame/resources/images"
 	"github.com/peterSZW/ebdemo/ebgame/sound"
 )
@@ -80,7 +81,7 @@ func init() {
 	robot = NewSprite()
 	robot.AddAnimationByte("default", &images.E_ROBO2, 2000, 8, ebiten.FilterNearest)
 	robot.Name = "E_ROBO2"
-	robot.Position(300-10-48, 400/3*2)
+	robot.Position(float64(screenSize.X/2), float64(screenSize.Y/2)+100)
 	robot.CenterCoordonnates = true
 	robot.Start()
 
@@ -89,7 +90,9 @@ func init() {
 	touchpad.CenterCoordonnates = true
 
 	sound.Load()
-	sound.PlayBgm(sound.BgmKindBattle)
+	sound.PlayBgm(sound.BgmOutThere)
+
+	paint.LoadFonts()
 
 	gv.Life = 100
 
@@ -242,7 +245,7 @@ func GetDirectByXY(xx, yy float64) int {
 	// return 0
 }
 
-var robot2 *Sprite
+// var robot2 *Sprite
 var lastGenEnemyTime time.Time
 
 func GenEnemy() {
@@ -335,6 +338,8 @@ func (g *Game) Update() error {
 
 		joybutton4.SetWH(screenSize.X, screenSize.Y)
 		joybutton4.rect.y = 170
+
+		robot.Position(float64(screenSize.X/2), float64(screenSize.Y/2)+100)
 
 		isFirstUpdate = false
 		isShowText = false
@@ -435,18 +440,28 @@ func (g *Game) Update() error {
 	}
 
 	if gv.Level == 0 {
+
+		robot.Show()
 		if joybutton4.GetJoyButton() || ebiten.IsKeyPressed(ebiten.KeyS) {
 			gv.Level = 1
 			gv.Life = 100
 			gv.Score = 0
+			spList = make(map[string]*Sprite)
+			sound.StopBgm(sound.BgmOutThere)
+			sound.PlayBgm(sound.BgmKindBattle)
 		}
 
 	}
 	if gv.Level == 1 {
 		GenEnemy()
 
+		//paint.DrawText(screen, "攻撃", screenSize.X/2, screenSize.Y/2, color.White, paint.FontSizeXLarge)
+
 		if gv.Life <= 0 {
-			gv.Level = 0
+			gv.Level = 4
+			spList = make(map[string]*Sprite)
+			sound.StopBgm(sound.BgmKindBattle)
+			sound.PlayBgm(sound.BgmOutThere)
 		}
 
 		if gv.Score > 200 {
@@ -457,13 +472,30 @@ func (g *Game) Update() error {
 	if gv.Level == 2 {
 		GenEnemy_level2()
 		if gv.Life <= 0 {
-			gv.Level = 0
+			gv.Level = 4
+			spList = make(map[string]*Sprite)
+			sound.StopBgm(sound.BgmKindBattle)
+			sound.PlayBgm(sound.BgmOutThere)
 		}
 
 	}
 
 	if gv.Level == 3 {
-		GenEnemy_level2()
+		//GenEnemy_level2()
+
+	}
+
+	if gv.Level == 4 {
+		robot.Hide()
+
+		if joybutton4.GetJoyButton() || ebiten.IsKeyPressed(ebiten.KeyS) {
+			gv.Level = 0
+			robot.Position(float64(screenSize.X/2), float64(screenSize.Y/2)+100)
+			spList = make(map[string]*Sprite)
+			sound.StopBgm(sound.BgmOutThere)
+			sound.PlayBgm(sound.BgmKindBattle)
+
+		}
 
 	}
 
@@ -511,6 +543,22 @@ func drawCollideBox(screen *ebiten.Image, sp *Sprite) {
 func (g *Game) Draw(screen *ebiten.Image) {
 	//打印 hello world 加帧数
 
+	if gv.Level == 1 {
+
+		//paint.DrawText(screen, "Attack !", screenSize.X/2-100, screenSize.Y/2, color.White, paint.FontSizeXLarge)
+
+	}
+
+	if gv.Level == 0 {
+
+		paint.DrawText(screen, "Click Fire to Start", screenSize.X/2-125, screenSize.Y/2, color.White, paint.FontSizeXLarge)
+
+	}
+	if gv.Level == 4 {
+
+		paint.DrawText(screen, "YOU LOST！", screenSize.X/2-75, screenSize.Y/2, color.White, paint.FontSizeXLarge)
+
+	}
 	if isShowText {
 
 		mx, my := ebiten.CursorPosition()
@@ -521,7 +569,9 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		ebitenutil.DebugPrint(screen, s)
 	}
 
-	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Life: %d\nScore:%d", gv.Life, gv.Score), screenSize.X-200, 100)
+	paint.DrawText(screen, fmt.Sprintf("Life: %d Score: %d", gv.Life, gv.Score), screenSize.X/2-125, 100, color.Gray{0x99}, paint.FontSizeXLarge)
+
+	//ebitenutil.DebugPrintAt(screen, , screenSize.X-200, 100)
 
 	joytouch.DrawBorders(screen, color.Gray16{0x1111})
 	//touchpad.Draw(screen)
@@ -536,12 +586,15 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	}
 	robot.Draw(screen)
 
-	for _, j := range spList {
-		if gv.ShowCollisionBox {
-			drawCollideBox(screen, j)
-		}
-		j.Draw(screen)
+	if gv.Level != 4 {
 
+		for _, j := range spList {
+			if gv.ShowCollisionBox {
+				drawCollideBox(screen, j)
+			}
+			j.Draw(screen)
+
+		}
 	}
 
 	for _, j := range enemyList {
@@ -553,7 +606,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	}
 	for k, j := range effList {
 		j.Draw(screen)
-		if j.GetStep() >= 7 {
+		if j.GetStep() >= j.GetTotalStep()-1 {
 			delete(effList, k)
 		}
 	}
@@ -577,10 +630,8 @@ func checkCollision() {
 	for k, enemy := range enemyList {
 
 		if IsCollideWith(enemy, robot) {
-			gv.Life = gv.Life - 5
 
 			newsprite := NewSprite()
-			//newsprite.AddAnimationByteCol("default", &images.RASER1, 2000, 4, 6, ebiten.FilterNearest)
 
 			newsprite.AddAnimationByte("default", &images.EXPLODE_MED, 500, 8, ebiten.FilterNearest)
 
@@ -597,6 +648,29 @@ func checkCollision() {
 			delete(enemyList, k)
 
 			sound.PlaySe(sound.SeKindHit2)
+
+			if gv.Life > 0 {
+				gv.Life = gv.Life - 5
+
+			} else {
+				gv.Life = 0
+
+				newsprite := NewSprite()
+				//newsprite.AddAnimationByteCol("default", &images.RASER1, 2000, 4, 6, ebiten.FilterNearest)
+
+				newsprite.AddAnimationByte("default", &images.EXPLODE_BIG, 2000, 10, ebiten.FilterNearest)
+
+				newsprite.Position(robot.X, robot.Y)
+				newsprite.CenterCoordonnates = true
+
+				newsprite.Start()
+				spCount++
+
+				effList[strconv.Itoa(spCount)] = newsprite
+				sound.PlaySe(sound.SeKindBomb)
+				break
+
+			}
 
 		}
 

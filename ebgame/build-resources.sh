@@ -21,3 +21,4 @@ generate () {
 
 generate "gfx" "gfx"
 
+generate "resources/audios" "audios"

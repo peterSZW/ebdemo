@@ -749,7 +749,11 @@ func (sprite *Sprite) ToogleAnimation() {
 		sprite.Resume()
 	}
 }
+func (sprite *Sprite) GetTotalStep() int {
+	currentAnimation := sprite.Animations[sprite.CurrentAnimation]
 
+	return currentAnimation.Steps
+}
 func (sprite *Sprite) GetStep() int {
 	currentAnimation := sprite.Animations[sprite.CurrentAnimation]
 

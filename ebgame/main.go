@@ -29,15 +29,17 @@ var curpath string
 var errstr string
 
 var (
-	robot    *Sprite
-	touchpad *Sprite
+	robot     *Sprite
+	robotpath *Sprite
+	touchpad  *Sprite
 )
 
 var joytouch JoyTouch
-var joybutton1 JoyButton
-var joybutton2 JoyButton
-var joybutton3 JoyButton
-var joybutton4 JoyButton
+var btnFire JoyButton
+var btnBullet JoyButton
+var btnDebug JoyButton
+var btnShowBox JoyButton
+var btnStart JoyButton
 
 var isShowText bool
 
@@ -52,6 +54,8 @@ type Gloable struct {
 	Score            int
 	ShowCollisionBox bool
 }
+
+var path Path
 
 var gv Gloable
 
@@ -84,6 +88,25 @@ func init() {
 	robot.Position(float64(screenSize.X/2), float64(screenSize.Y/2)+100)
 	robot.CenterCoordonnates = true
 	robot.Start()
+
+	robotpath = NewSprite()
+	robotpath.AddAnimationByte("default", &images.E_SHOOTER1, 2000, 8, ebiten.FilterNearest)
+	robotpath.Name = "E_SHOOTER1"
+	robotpath.Position(float64(screenSize.X/2), float64(screenSize.Y/2)+100)
+	robotpath.CenterCoordonnates = true
+	robotpath.Pause()
+
+	path.Add(100, 100)
+	path.Add(300, 100)
+	path.Add(300, 600)
+	path.Add(100, 600)
+	path.Add(100, 100)
+
+	path.PlayPath()
+	path.Speed = 50
+
+	p := path.Next()
+	robotpath.Position(float64(p.x), float64(p.y))
 
 	touchpad = NewSprite()
 	touchpad.AddAnimationByte("default", &gfx.TOUCHPAD, 2000, 1, ebiten.FilterNearest)
@@ -260,12 +283,15 @@ func GenEnemy() {
 		newsprite.Position(float64(rand.Intn(screenSize.X)), 0)
 		newsprite.CenterCoordonnates = true
 		newsprite.Pause()
-		//newsprite.Step(18)
-		newsprite.Speed = float64(7 + rand.Intn(6))
-		//newsprite.Angle = robot2.Direction //+90 GetDegreeByXY(xx, yy)
-		newsprite.Direction = float64(270 - 20 + rand.Intn(20))
 
-		//newsprite.Start()
+		newsprite.Speed = float64(3 + rand.Intn(6))
+
+		newsprite.Direction = float64(270 - 50 + rand.Intn(100))
+
+		// newsprite.AddEffect(&EffectOptions{Effect: Move, X: 400, Y: 800, Duration: 2000, Repeat: false, GoBack: false})
+		// newsprite.AddEffect(&EffectOptions{Effect: Move, X: 200, Y: 400, Duration: 2000, Repeat: false, GoBack: false})
+
+		// newsprite.Start()
 
 		spCount++
 
@@ -286,7 +312,7 @@ func GenEnemy_level2() {
 		newsprite.CenterCoordonnates = true
 		newsprite.Pause()
 		newsprite.Speed = float64(7 + rand.Intn(6))
-		newsprite.Direction = float64(270 - 20 + rand.Intn(20))
+		newsprite.Direction = float64(270 - 20 + rand.Intn(40))
 		spCount++
 		enemyList[strconv.Itoa(spCount)] = newsprite
 		//===========
@@ -296,8 +322,8 @@ func GenEnemy_level2() {
 		newsprite.Position(0, float64(rand.Intn(screenSize.Y)))
 		newsprite.CenterCoordonnates = true
 		newsprite.Pause()
-		newsprite.Speed = float64(7 + rand.Intn(6))
-		newsprite.Direction = float64(0 - 20 + rand.Intn(20))
+		newsprite.Speed = float64(2 + rand.Intn(6))
+		newsprite.Direction = float64(0 - 20 + rand.Intn(40))
 		spCount++
 		enemyList[strconv.Itoa(spCount)] = newsprite
 
@@ -308,8 +334,8 @@ func GenEnemy_level2() {
 		newsprite.Position(float64(screenSize.X), float64(rand.Intn(screenSize.Y)))
 		newsprite.CenterCoordonnates = true
 		newsprite.Pause()
-		newsprite.Speed = float64(7 + rand.Intn(6))
-		newsprite.Direction = float64(180 - 20 + rand.Intn(20))
+		newsprite.Speed = float64(2 + rand.Intn(6))
+		newsprite.Direction = float64(180 - 20 + rand.Intn(40))
 		spCount++
 		enemyList[strconv.Itoa(spCount)] = newsprite
 
@@ -329,15 +355,21 @@ func (g *Game) Update() error {
 		touchpad.X = float64(joytouch.rect.x + joytouch.rect.w/2)
 		touchpad.Y = float64(joytouch.rect.y + joytouch.rect.w/2)
 
-		joybutton1.SetWH(screenSize.X, screenSize.Y)
-		joybutton1.rect.x = joybutton1.rect.x - 35
-		joybutton2.SetWH(screenSize.X, screenSize.Y)
-		joybutton2.rect.x = joybutton2.rect.x + 35
-		joybutton3.SetWH(screenSize.X, screenSize.Y)
-		joybutton3.rect.y = 35
+		btnFire.SetWH(screenSize.X, screenSize.Y)
+		btnFire.rect.x = btnFire.rect.x - 35
+		btnBullet.SetWH(screenSize.X, screenSize.Y)
+		btnBullet.rect.x = btnBullet.rect.x + 35
+		btnDebug.SetWH(screenSize.X, screenSize.Y)
+		btnDebug.rect.y = 35
 
-		joybutton4.SetWH(screenSize.X, screenSize.Y)
-		joybutton4.rect.y = 170
+		btnShowBox.SetWH(screenSize.X, screenSize.Y)
+		btnShowBox.rect.y = 170
+
+		btnStart.SetWH(screenSize.X, screenSize.Y)
+		btnStart.rect.x = screenSize.X/2 - 100
+		btnStart.rect.y = screenSize.Y/2 - 50
+		btnStart.rect.w = 200
+		btnStart.rect.h = 100
 
 		robot.Position(float64(screenSize.X/2), float64(screenSize.Y/2)+100)
 
@@ -373,7 +405,7 @@ func (g *Game) Update() error {
 		}
 
 		//生成子弹
-		if joybutton1.GetJoyButton() || ebiten.IsKeyPressed(ebiten.KeySpace) {
+		if btnFire.GetJoyButton() || ebiten.IsKeyPressed(ebiten.KeySpace) {
 
 			if time.Since(lastBulletTime) > time.Duration(100*time.Millisecond) {
 				lastBulletTime = time.Now()
@@ -398,14 +430,15 @@ func (g *Game) Update() error {
 			}
 		}
 
-		if joybutton3.GetJoyButton() || ebiten.IsKeyPressed(ebiten.KeyT) {
+		if btnDebug.GetJoyButton() || ebiten.IsKeyPressed(ebiten.KeyT) {
 			isShowText = !isShowText
 		}
-		if joybutton4.GetJoyButton() || ebiten.IsKeyPressed(ebiten.KeyC) {
+
+		if btnShowBox.GetClicked() || ebiten.IsKeyPressed(ebiten.KeyC) {
 			gv.ShowCollisionBox = !gv.ShowCollisionBox
 		}
 
-		if joybutton2.GetJoyButton() || ebiten.IsKeyPressed(ebiten.Key1) {
+		if btnBullet.GetJoyButton() || ebiten.IsKeyPressed(ebiten.Key1) {
 			if time.Since(lastLaserTime) > time.Duration(50*time.Millisecond) {
 				lastLaserTime = time.Now()
 
@@ -439,10 +472,10 @@ func (g *Game) Update() error {
 
 	}
 
-	if gv.Level == 0 {
+	if gv.Level == 0 { //clickstart
 
 		robot.Show()
-		if joybutton4.GetJoyButton() || ebiten.IsKeyPressed(ebiten.KeyS) {
+		if btnStart.GetClicked() || btnShowBox.GetJoyButton() || ebiten.IsKeyPressed(ebiten.KeyS) {
 			gv.Level = 1
 			gv.Life = 100
 			gv.Score = 0
@@ -452,7 +485,7 @@ func (g *Game) Update() error {
 		}
 
 	}
-	if gv.Level == 1 {
+	if gv.Level == 1 { //level 1
 		GenEnemy()
 
 		//paint.DrawText(screen, "攻撃", screenSize.X/2, screenSize.Y/2, color.White, paint.FontSizeXLarge)
@@ -469,7 +502,7 @@ func (g *Game) Update() error {
 		}
 
 	}
-	if gv.Level == 2 {
+	if gv.Level == 2 { //level 2
 		GenEnemy_level2()
 		if gv.Life <= 0 {
 			gv.Level = 4
@@ -477,18 +510,45 @@ func (g *Game) Update() error {
 			sound.StopBgm(sound.BgmKindBattle)
 			sound.PlayBgm(sound.BgmOutThere)
 		}
+		if gv.Score > 300 {
+			gv.Level = 5
+		}
 
 	}
 
 	if gv.Level == 3 {
-		//GenEnemy_level2()
+		GenEnemy_level2()
+
+		if gv.Life <= 0 {
+			gv.Level = 4
+			spList = make(map[string]*Sprite)
+			sound.StopBgm(sound.BgmKindBattle)
+			sound.PlayBgm(sound.BgmOutThere)
+		}
+
+		if gv.Score > 300 {
+			gv.Level = 5
+		}
 
 	}
 
-	if gv.Level == 4 {
+	if gv.Level == 4 { //youlost
 		robot.Hide()
 
-		if joybutton4.GetJoyButton() || ebiten.IsKeyPressed(ebiten.KeyS) {
+		if btnStart.GetClicked() || btnShowBox.GetJoyButton() || ebiten.IsKeyPressed(ebiten.KeyS) {
+			gv.Level = 0
+			robot.Position(float64(screenSize.X/2), float64(screenSize.Y/2)+100)
+			spList = make(map[string]*Sprite)
+			sound.StopBgm(sound.BgmOutThere)
+			sound.PlayBgm(sound.BgmKindBattle)
+
+		}
+
+	}
+
+	if gv.Level == 5 { //youwin
+
+		if btnStart.GetClicked() || btnShowBox.GetJoyButton() || ebiten.IsKeyPressed(ebiten.KeyS) {
 			gv.Level = 0
 			robot.Position(float64(screenSize.X/2), float64(screenSize.Y/2)+100)
 			spList = make(map[string]*Sprite)
@@ -535,7 +595,17 @@ func (g *Game) Update() error {
 func drawCollideBox(screen *ebiten.Image, sp *Sprite) {
 	cb := sp.GetCollisionBox()
 	for _, b := range cb {
-		ebitenutil.DrawRect(screen, b.x+sp.X-sp.GetWidth()/2, b.y+sp.Y-sp.GetHeight()/2, b.w, b.h, color.White) // right
+		x := b.x + sp.X - sp.GetWidth()/2
+		y := b.y + sp.Y - sp.GetHeight()/2
+		w := b.w
+		h := b.h
+
+		//ebitenutil.DrawRect(screen, b.x+sp.X-sp.GetWidth()/2, b.y+sp.Y-sp.GetHeight()/2, b.w, b.h, color.White) // right
+
+		ebitenutil.DrawLine(screen, x, y, x+w, y, color.White)
+		ebitenutil.DrawLine(screen, x+w, y, x+w, y+h, color.White)
+		ebitenutil.DrawLine(screen, x, y, x, y+h, color.White)
+		ebitenutil.DrawLine(screen, x+w, y+h, x, y+h, color.White)
 
 	}
 }
@@ -559,6 +629,12 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		paint.DrawText(screen, "YOU LOST！", screenSize.X/2-75, screenSize.Y/2, color.White, paint.FontSizeXLarge)
 
 	}
+
+	if gv.Level == 5 {
+
+		paint.DrawText(screen, "YOU WIN！", screenSize.X/2-75, screenSize.Y/2, color.White, paint.FontSizeXLarge)
+
+	}
 	if isShowText {
 
 		mx, my := ebiten.CursorPosition()
@@ -576,10 +652,11 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	joytouch.DrawBorders(screen, color.Gray16{0x1111})
 	//touchpad.Draw(screen)
 
-	joybutton1.DrawBorders(screen, color.Gray16{0x1111})
-	joybutton2.DrawBorders(screen, color.Gray16{0x1111})
-	joybutton3.DrawBorders(screen, color.Gray16{0x1111})
-	joybutton4.DrawBorders(screen, color.Gray16{0x1111})
+	btnFire.DrawBorders(screen, color.Gray16{0x1111})
+	btnBullet.DrawBorders(screen, color.Gray16{0x1111})
+	btnDebug.DrawBorders(screen, color.Gray16{0x1111})
+	btnShowBox.DrawBorders(screen, color.Gray16{0x1111})
+	btnStart.DrawBorders(screen, color.Gray16{0x1111})
 
 	if gv.ShowCollisionBox {
 		drawCollideBox(screen, robot)
@@ -610,6 +687,15 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			delete(effList, k)
 		}
 	}
+
+	p := path.Next()
+	robotpath.Position(p.x, p.y)
+	robotpath.Draw(screen)
+
+	if path.LastProgress == path.Totallength {
+		path.Reset()
+	}
+
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {

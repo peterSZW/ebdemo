@@ -34,6 +34,9 @@ type JoyButton struct {
 }
 
 func (joybtn *JoyButton) GetClicked() bool {
+
+	joybtn.GetJoyButton()
+
 	v := joybtn.clicked
 
 	joybtn.clicked = false
@@ -67,29 +70,11 @@ func (joybtn *JoyButton) Press(x, y int, tid int) bool {
 		joybtn.tid = tid
 		joybtn.x = x
 		joybtn.y = y
-		joybtn.clicked = true
+
 		return true
 	}
 	return false
 }
-
-// func (joybtn *JoyButton) Move(x, y int) (xx float64, yy float64) {
-
-// 	xx = 0
-// 	yy = 0
-// 	dis := math.Sqrt(float64((x-joybtn.x)*(x-joybtn.x) + (y-joybtn.y)*(y-joybtn.y)))
-
-// 	// if dis > 0 {
-// 	// 	xx = float64(x-joybtn.x) / dis
-// 	// 	yy = float64(y-joybtn.y) / dis
-// 	// }
-// 	if dis > 0 {
-// 		xx = float64(x-joybtn.x) / dis * 5
-// 		yy = float64(y-joybtn.y) / dis * 5
-// 	}
-// 	return
-
-// }
 
 func (joybtn *JoyButton) DrawBorders(surface *ebiten.Image, c color.Color) {
 	var x, y, x1, y1 float64
@@ -128,6 +113,9 @@ func (joybtn *JoyButton) GetJoyButton() bool {
 			if isstillpress {
 
 			} else {
+				if joybtn.tid != 0 {
+					joybtn.clicked = true
+				}
 				joybtn.tid = 0
 
 				for _, id := range touches {
@@ -136,6 +124,7 @@ func (joybtn *JoyButton) GetJoyButton() bool {
 
 					if joybtn.Press(x, y, int(id)) {
 						isstillpress = true
+						joybtn.clicked = false
 						break
 					}
 
@@ -160,6 +149,10 @@ func (joybtn *JoyButton) GetJoyButton() bool {
 
 	} else {
 		//all reased
+
+		if joybtn.tid != 0 {
+			joybtn.clicked = true
+		}
 		joybtn.tid = 0
 		joybtn.x = 0
 		joybtn.y = 0
@@ -167,6 +160,8 @@ func (joybtn *JoyButton) GetJoyButton() bool {
 	}
 	if isstillpress {
 		touchStr = touchStr + "\n" + "FIRE PRESS - " + strconv.Itoa(joybtn.tid)
+	} else {
+
 	}
 	return isstillpress
 }

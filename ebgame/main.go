@@ -97,9 +97,13 @@ func init() {
 	robotpath.Pause()
 
 	path.Add(100, 100)
+	path.Add(150, 50)
 	path.Add(300, 100)
+	path.Add(350, 350)
 	path.Add(300, 600)
+	path.Add(200, 650)
 	path.Add(100, 600)
+	path.Add(50, 350)
 	path.Add(100, 100)
 
 	path.PlayPath()

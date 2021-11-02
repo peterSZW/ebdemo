@@ -46,11 +46,19 @@ func (joybtn *JoyButton) GetTid() int {
 	return joybtn.tid
 }
 
+func (joybtn *JoyButton) SetPosition(x, y, w, h int) {
+	joybtn.width = w
+	joybtn.height = h
+	joybtn.rect.x = x
+	joybtn.rect.w = w
+	joybtn.rect.y = y
+	joybtn.rect.h = h
+}
 func (joybtn *JoyButton) SetWH(w, h int) {
 	if h > w {
 		joybtn.width = w
 		joybtn.height = h
-		joybtn.rect.x = w/2 + w/6
+		joybtn.rect.x = w/2 + w/6 + 10
 		joybtn.rect.w = w / 6
 		joybtn.rect.y = h - w/2 + w/6
 		joybtn.rect.h = w / 6

@@ -7,17 +7,23 @@ import (
 )
 
 func TestXXX(t *testing.T) {
-	var a Path
-	a.Add(100, 100)
-	a.Add(300, 100)
-	a.Add(300, 600)
-	a.Add(100, 600)
+	var path Path
+	path.Add(100, 100)
+	path.Add(200, 50)
+	path.Add(300, 100)
 
-	a.PlayPath()
-	a.Speed = 50
+	path.Add(350, 350)
+	path.Add(300, 600)
+	path.Add(200, 650)
+	path.Add(100, 600)
+	path.Add(50, 350)
+	path.Add(100, 100)
 
-	for a.LastProgress < a.Totallength {
-		fmt.Println(a.Next(), a.LastProgress)
+	path.PlayPath()
+	path.Speed = 50
+
+	for path.LastProgress < path.Totallength {
+		fmt.Println(path.Next(), path.LastProgress)
 		time.Sleep(time.Duration(time.Millisecond * 30))
 
 	}

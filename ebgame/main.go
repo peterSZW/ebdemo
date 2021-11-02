@@ -61,6 +61,7 @@ var gv Gloable
 
 //初始化
 func init() {
+	//debug.SetGCPercent(-1)
 	spList = make(map[string]*Sprite)
 	enemyList = make(map[string]*Sprite)
 	effList = make(map[string]*Sprite)
@@ -96,21 +97,27 @@ func init() {
 	robotpath.CenterCoordonnates = true
 	robotpath.Pause()
 
-	path.Add(100, 100)
-	path.Add(150, 50)
-	path.Add(300, 100)
-	path.Add(350, 350)
-	path.Add(300, 600)
-	path.Add(200, 650)
-	path.Add(100, 600)
-	path.Add(50, 350)
-	path.Add(100, 100)
+	// path.Add(100, 100)
+	// path.Add(200, 50)
+	// path.Add(300, 100)
+
+	// path.Add(350, 350)
+	// path.Add(300, 600)
+	// path.Add(200, 650)
+	// path.Add(100, 600)
+	// path.Add(50, 350)
+	// path.Add(100, 100)
+
+	for r := 0; r <= 360; r = r + 10 {
+
+		x := math.Sin(deg2rad(float64(r))) * 100
+		y := math.Cos(deg2rad(float64(r))) * 100
+		path.Add(x+200, y+200)
+
+	}
 
 	path.PlayPath()
-	path.Speed = 50
-
-	p := path.Next()
-	robotpath.Position(float64(p.x), float64(p.y))
+	path.Speed = 4
 
 	touchpad = NewSprite()
 	touchpad.AddAnimationByte("default", &gfx.TOUCHPAD, 2000, 1, ebiten.FilterNearest)
@@ -363,17 +370,11 @@ func (g *Game) Update() error {
 		btnFire.rect.x = btnFire.rect.x - 35
 		btnBullet.SetWH(screenSize.X, screenSize.Y)
 		btnBullet.rect.x = btnBullet.rect.x + 35
-		btnDebug.SetWH(screenSize.X, screenSize.Y)
-		btnDebug.rect.y = 35
 
-		btnShowBox.SetWH(screenSize.X, screenSize.Y)
-		btnShowBox.rect.y = 170
+		btnDebug.SetPosition(screenSize.X/2-125, screenSize.Y/2-300, 50, 50)
+		btnShowBox.SetPosition(screenSize.X/2+75, screenSize.Y/2-300, 50, 50)
 
-		btnStart.SetWH(screenSize.X, screenSize.Y)
-		btnStart.rect.x = screenSize.X/2 - 100
-		btnStart.rect.y = screenSize.Y/2 - 50
-		btnStart.rect.w = 200
-		btnStart.rect.h = 100
+		btnStart.SetPosition(screenSize.X/2-125, screenSize.Y/2-32, 240, 32)
 
 		robot.Position(float64(screenSize.X/2), float64(screenSize.Y/2)+100)
 
@@ -584,6 +585,19 @@ func (g *Game) Update() error {
 	checkCollision()
 	//生成字符串
 
+	//=================
+	// p := path.Next()
+	// robotpath.Position(p.x, p.y)
+
+	p := path.Next()
+	//robotpath.X = math.Round(p.x)
+	//robotpath.Y = math.Round(p.y + 200)
+	robotpath.Position(p.x, p.y)
+
+	if path.LastProgress == path.Totallength {
+		path.Reset()
+	}
+	//================
 	touchStr = touchStr + "\n" + fmt.Sprintf("[%d,%d]", joytouch.x, joytouch.y)
 	touchStr = touchStr + "\n" + fmt.Sprintf("[%d]", joytouch.tid)
 	touchStr = touchStr + "\n" + fmt.Sprintf("[%f]", robot.Angle)
@@ -660,11 +674,13 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	btnBullet.DrawBorders(screen, color.Gray16{0x1111})
 	btnDebug.DrawBorders(screen, color.Gray16{0x1111})
 	btnShowBox.DrawBorders(screen, color.Gray16{0x1111})
-	btnStart.DrawBorders(screen, color.Gray16{0x1111})
+	//btnStart.DrawBorders(screen, color.Gray16{0x1111})
 
 	if gv.ShowCollisionBox {
 		drawCollideBox(screen, robot)
 	}
+
+	robotpath.Draw(screen)
 	robot.Draw(screen)
 
 	if gv.Level != 4 {
@@ -685,19 +701,12 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		j.Draw(screen)
 
 	}
+
 	for k, j := range effList {
 		j.Draw(screen)
 		if j.GetStep() >= j.GetTotalStep()-1 {
 			delete(effList, k)
 		}
-	}
-
-	p := path.Next()
-	robotpath.Position(p.x, p.y)
-	robotpath.Draw(screen)
-
-	if path.LastProgress == path.Totallength {
-		path.Reset()
 	}
 
 }

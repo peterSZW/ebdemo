@@ -42,7 +42,7 @@ func (p *Path) PlayPath() {
 	lasty := 0.
 	for i := 0; i < len(p.points); i++ {
 		point := p.points[i]
-		fmt.Println(i, point.x, point.y, lastx, lasty)
+		//fmt.Println(i, point.x, point.y, lastx, lasty)
 		if i >= 1 {
 			l := math.Sqrt(float64((point.x-lastx)*(point.x-lastx) + (point.y-lasty)*(point.y-lasty)))
 
@@ -50,7 +50,7 @@ func (p *Path) PlayPath() {
 
 			p.minpath = append(p.minpath, MinPath{length, length + l, l})
 
-			fmt.Println("========", l, length, length+l)
+			//fmt.Println("--------------------------", length, length+l, l)
 			p.Totallength = length + l
 			length = length + l
 		}
@@ -63,6 +63,7 @@ func (p *Path) PlayPath() {
 func (p *Path) Reset() {
 	p.isStarted = false
 	p.LastProgress = 0
+	p.LastIndex = 0
 	p.lastCalc = time.Now()
 
 }
@@ -84,18 +85,24 @@ func (p *Path) Next() *Point {
 	//fmt.Println(int(time.Since(p.lastCalc) / 100000000))
 	//fmt.Println(time.Since(p.lastCalc))
 
-	//p.LastProgress = p.LastProgress + 1
-	p.LastProgress = p.Speed * float64(time.Since(p.lastCalc).Microseconds()) / 100000
+	//newProgress := p.Speed * float64(time.Since(p.lastCalc).Microseconds()) / 100000
+	// if p.LastProgress > newProgress {
+	// 	fmt.Println("Errr", p.LastProgress, newProgress)
+	// }
+	// p.LastProgress = newProgress
+
+	p.LastProgress = p.LastProgress + p.Speed
 	if p.LastProgress > p.Totallength {
 		p.LastProgress = p.Totallength
 
 	}
 
-	for i := 0; i < len(p.minpath); i++ {
+	for i := p.LastIndex; i < len(p.minpath); i++ {
 		mp := p.minpath[i]
 
 		//fmt.Println(p.LastProgress)
 		if (mp.start <= p.LastProgress) && (p.LastProgress <= mp.end) {
+			p.LastIndex = i
 			pencent := (p.LastProgress - mp.start) / mp.length
 			xx := p.points[i].x + ((p.points[i+1].x - p.points[i].x) * (pencent))
 			yy := p.points[i].y + ((p.points[i+1].y - p.points[i].y) * (pencent))
@@ -104,6 +111,7 @@ func (p *Path) Next() *Point {
 		}
 
 	}
+	fmt.Println("ERROR!!!!!!!!")
 	return nil
 
 }

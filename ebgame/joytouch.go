@@ -26,9 +26,9 @@ func (joytouch *JoyTouch) SetWH(w, h int) {
 	if h > w {
 		joytouch.width = w
 		joytouch.height = h
-		joytouch.rect.x = 0 + 10
+		joytouch.rect.x = 0 + 20
 		joytouch.rect.w = w / 2
-		joytouch.rect.y = h - w/2 - 10
+		joytouch.rect.y = h - w/2 - 20
 		joytouch.rect.h = w / 2
 	} else {
 		joytouch.width = w

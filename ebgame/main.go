@@ -130,6 +130,10 @@ func init() {
 
 	gv.Life = 100
 
+	client()
+	login()
+	go loopUpdate()
+
 }
 
 func getCurrentDirectory() string {

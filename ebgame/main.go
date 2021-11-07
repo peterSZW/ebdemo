@@ -408,6 +408,100 @@ var lastLaserTime time.Time
 var degree float64
 
 //循环计算
+
+func movePlanAndFireBullet() {
+	//移动飞机
+	xx, yy, _ := joytouch.GetJoyTouchXY()
+
+	if xx == 0 && yy == 0 {
+		xx, yy = GetKeyBoard()
+	}
+	robot.Pause()
+	if GetDirectByXY(xx, yy) > 0 {
+		robot.Step(GetDirectByXY(xx, yy))
+		degree = GetDegreeByXY(xx, yy)
+	}
+
+	robot.X = robot.X + xx
+	robot.Y = robot.Y + yy
+	robot.X, robot.Y = limiXY(robot.X, robot.Y)
+
+	if ebiten.IsKeyPressed(ebiten.KeyQ) {
+		robot.Angle = robot.Angle + 10
+	}
+
+	if ebiten.IsKeyPressed(ebiten.KeyW) {
+		robot.Angle = robot.Angle - 10
+	}
+
+	//生成子弹
+	if btnFire.GetJoyButton() || ebiten.IsKeyPressed(ebiten.KeySpace) {
+
+		if time.Since(lastBulletTime) > time.Duration(100*time.Millisecond) {
+			lastBulletTime = time.Now()
+
+			newsprite := NewSprite()
+			//newsprite.AddAnimationByteCol("default", &images.RASER1, 2000, 4, 6, ebiten.FilterNearest)
+			newsprite.AddAnimationByte("default", &gfx.EXPLOSION2, 500, 7, ebiten.FilterNearest)
+			newsprite.Name = "EXPLOSION2"
+			newsprite.Position(robot.X, robot.Y)
+			newsprite.AddEffect(&EffectOptions{Effect: Zoom, Zoom: 3, Duration: 6000, Repeat: false, GoBack: true})
+			newsprite.CenterCoordonnates = true
+
+			newsprite.Direction = degree + 90 //GetDegreeByXY(xx, yy) + 90
+			//float64(2-robot.GetStep()) * 45
+
+			newsprite.Speed = 5
+			newsprite.Start()
+
+			spriteCount++
+
+			bulletList[spriteCount] = newsprite
+		}
+	}
+
+	if btnDebug.GetJoyButton() || ebiten.IsKeyPressed(ebiten.KeyT) {
+		gv.IsShowText = !gv.IsShowText
+	}
+
+	if btnShowBox.GetClicked() || ebiten.IsKeyPressed(ebiten.KeyC) {
+		gv.IsShowCollisionBox = !gv.IsShowCollisionBox
+	}
+
+	if btnBullet.GetJoyButton() || ebiten.IsKeyPressed(ebiten.Key1) {
+		if time.Since(lastLaserTime) > time.Duration(50*time.Millisecond) {
+			lastLaserTime = time.Now()
+
+			newsprite := NewSprite()
+			//newsprite.AddAnimationByte("default", &gfx.EXPLOSION3, 500, 9, ebiten.FilterNearest)
+			newsprite.AddAnimationByteCol("default", &images.RASER1, 200, 4, 6, ebiten.FilterNearest)
+			newsprite.Name = "RASER1"
+			newsprite.Position(robot.X, robot.Y)
+			//newsprite.AddEffect(&EffectOptions{Effect: Zoom, Zoom: 3, Duration: 6000, Repeat: false, GoBack: true})
+			//newsprite.CenterCoordonnates = true
+			newsprite.Pause()
+			newsprite.Step(18)
+			newsprite.Speed = 8
+			newsprite.Angle = degree          //+90 GetDegreeByXY(xx, yy)
+			newsprite.Direction = degree + 90 // GetDegreeByXY(xx, yy) + 90
+
+			//newsprite.Start()
+
+			spriteCount++
+
+			bulletList[spriteCount] = newsprite
+
+		}
+	}
+	touchpad.Angle = degree
+	if joytouch.x != 0 && joytouch.y != 0 {
+		touchpad.X = float64(joytouch.x)
+		touchpad.Y = float64(joytouch.y)
+	}
+	touchStr = touchStr + "\n" + fmt.Sprintf("PAD:[%f,%f] DEG:[%f]", xx, yy, GetDegreeByXY(xx, yy))
+
+}
+
 func (g *Game) Update() error {
 	//第一次设置
 	if isFirstUpdate {
@@ -429,102 +523,10 @@ func (g *Game) Update() error {
 
 		isFirstUpdate = false
 		gv.IsShowText = false
-
 		gv.Level = 0
 	}
 
-	{
-		//移动飞机
-		xx, yy, _ := joytouch.GetJoyTouchXY()
-
-		if xx == 0 && yy == 0 {
-			xx, yy = GetKeyBoard()
-		}
-		robot.Pause()
-		if GetDirectByXY(xx, yy) > 0 {
-			robot.Step(GetDirectByXY(xx, yy))
-			degree = GetDegreeByXY(xx, yy)
-		}
-
-		robot.X = robot.X + xx
-		robot.Y = robot.Y + yy
-		robot.X, robot.Y = limiXY(robot.X, robot.Y)
-
-		if ebiten.IsKeyPressed(ebiten.KeyQ) {
-			robot.Angle = robot.Angle + 10
-		}
-
-		if ebiten.IsKeyPressed(ebiten.KeyW) {
-			robot.Angle = robot.Angle - 10
-		}
-
-		//生成子弹
-		if btnFire.GetJoyButton() || ebiten.IsKeyPressed(ebiten.KeySpace) {
-
-			if time.Since(lastBulletTime) > time.Duration(100*time.Millisecond) {
-				lastBulletTime = time.Now()
-
-				newsprite := NewSprite()
-				//newsprite.AddAnimationByteCol("default", &images.RASER1, 2000, 4, 6, ebiten.FilterNearest)
-				newsprite.AddAnimationByte("default", &gfx.EXPLOSION2, 500, 7, ebiten.FilterNearest)
-				newsprite.Name = "EXPLOSION2"
-				newsprite.Position(robot.X, robot.Y)
-				newsprite.AddEffect(&EffectOptions{Effect: Zoom, Zoom: 3, Duration: 6000, Repeat: false, GoBack: true})
-				newsprite.CenterCoordonnates = true
-
-				newsprite.Direction = degree + 90 //GetDegreeByXY(xx, yy) + 90
-				//float64(2-robot.GetStep()) * 45
-
-				newsprite.Speed = 5
-				newsprite.Start()
-
-				spriteCount++
-
-				bulletList[spriteCount] = newsprite
-			}
-		}
-
-		if btnDebug.GetJoyButton() || ebiten.IsKeyPressed(ebiten.KeyT) {
-			gv.IsShowText = !gv.IsShowText
-		}
-
-		if btnShowBox.GetClicked() || ebiten.IsKeyPressed(ebiten.KeyC) {
-			gv.IsShowCollisionBox = !gv.IsShowCollisionBox
-		}
-
-		if btnBullet.GetJoyButton() || ebiten.IsKeyPressed(ebiten.Key1) {
-			if time.Since(lastLaserTime) > time.Duration(50*time.Millisecond) {
-				lastLaserTime = time.Now()
-
-				newsprite := NewSprite()
-				//newsprite.AddAnimationByte("default", &gfx.EXPLOSION3, 500, 9, ebiten.FilterNearest)
-				newsprite.AddAnimationByteCol("default", &images.RASER1, 200, 4, 6, ebiten.FilterNearest)
-				newsprite.Name = "RASER1"
-				newsprite.Position(robot.X, robot.Y)
-				//newsprite.AddEffect(&EffectOptions{Effect: Zoom, Zoom: 3, Duration: 6000, Repeat: false, GoBack: true})
-				//newsprite.CenterCoordonnates = true
-				newsprite.Pause()
-				newsprite.Step(18)
-				newsprite.Speed = 8
-				newsprite.Angle = degree          //+90 GetDegreeByXY(xx, yy)
-				newsprite.Direction = degree + 90 // GetDegreeByXY(xx, yy) + 90
-
-				//newsprite.Start()
-
-				spriteCount++
-
-				bulletList[spriteCount] = newsprite
-
-			}
-		}
-		touchpad.Angle = degree
-		if joytouch.x != 0 && joytouch.y != 0 {
-			touchpad.X = float64(joytouch.x)
-			touchpad.Y = float64(joytouch.y)
-		}
-		touchStr = touchStr + "\n" + fmt.Sprintf("PAD:[%f,%f] DEG:[%f]", xx, yy, GetDegreeByXY(xx, yy))
-
-	}
+	movePlanAndFireBullet()
 
 	if gv.Level == 0 { //clickstart
 
@@ -613,7 +615,7 @@ func (g *Game) Update() error {
 
 	}
 
-	//删除越界的对象
+	//删除越界的子弹对象
 	for k, j := range bulletList {
 
 		if OutofScreen(j.X, j.Y, 20) {
@@ -622,7 +624,7 @@ func (g *Game) Update() error {
 		}
 	}
 
-	//删除越界的对象
+	//删除越界的敌人对象
 	for k, j := range enemyList {
 
 		if OutofScreen(j.X, j.Y, 20) {
@@ -631,22 +633,18 @@ func (g *Game) Update() error {
 		}
 	}
 
+	//检查碰撞
 	checkCollision()
-	//生成字符串
 
-	//=================
-	// p := path.Next()
-	// robotpath.Position(p.x, p.y)
-
+	//计算路径
 	p := path.Next()
-	//robotpath.X = math.Round(p.x)
-	//robotpath.Y = math.Round(p.y + 200)
 	robotpath.Position(p.x, p.y)
 
 	if path.LastProgress == path.Totallength {
 		path.Reset()
 	}
-	//================
+
+	//生成字符串
 	touchStr = touchStr + "\n" + fmt.Sprintf("[%d,%d]", joytouch.x, joytouch.y)
 	touchStr = touchStr + "\n" + fmt.Sprintf("[%d]", joytouch.tid)
 	touchStr = touchStr + "\n" + fmt.Sprintf("[%f]", robot.Angle)
@@ -654,8 +652,6 @@ func (g *Game) Update() error {
 	touchStr = touchStr + "\n" + fmt.Sprintf("[%v]", len(bulletList))
 	touchStr = touchStr + "\n" + fmt.Sprintf("[%v]", len(enemyList))
 
-	//延迟0.01毫秒
-	//time.Sleep(10 * time.Millisecond)
 	return nil
 }
 

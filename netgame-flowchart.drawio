@@ -1,4 +1,4 @@
-<mxfile host="app.diagrams.net" modified="2021-11-07T10:49:44.185Z" agent="5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.82 Safari/537.36" etag="67t9gnw_iSbY2JSwf-gN" version="15.7.0" type="github">
+<mxfile host="app.diagrams.net" modified="2021-11-07T15:02:55.323Z" agent="5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.82 Safari/537.36" etag="_02YHSFhxAd-HYcEDz3O" version="15.7.0" type="github">
   <diagram id="tRa1csH4-88LfmXuXKnR" name="Page-1">
     <mxGraphModel dx="1113" dy="641" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
       <root>
@@ -347,6 +347,15 @@
         </mxCell>
         <mxCell id="_BUBwYhiotf9pkntxFAq-35" value="结束" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
           <mxGeometry x="2160" y="650" width="90" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="_BUBwYhiotf9pkntxFAq-37" value="&lt;div style=&quot;line-height: 21px&quot;&gt;&lt;div style=&quot;line-height: 21px&quot;&gt;&lt;font face=&quot;menlo, monaco, courier new, monospace&quot;&gt;&lt;span style=&quot;font-size: 14px&quot;&gt;删除越界的子弹对象&lt;/span&gt;&lt;/font&gt;&lt;/div&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#cce5ff;strokeColor=#36393d;" vertex="1" parent="1">
+          <mxGeometry x="2350" y="240" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="_BUBwYhiotf9pkntxFAq-38" value="&lt;div style=&quot;line-height: 21px&quot;&gt;&lt;div style=&quot;line-height: 21px&quot;&gt;&lt;span style=&quot;font-size: 14px ; font-family: &amp;#34;menlo&amp;#34; , &amp;#34;monaco&amp;#34; , &amp;#34;courier new&amp;#34; , monospace&quot;&gt;删除越界的敌人对象&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#cce5ff;strokeColor=#36393d;" vertex="1" parent="1">
+          <mxGeometry x="2500" y="240" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="_BUBwYhiotf9pkntxFAq-39" value="&lt;div style=&quot;line-height: 21px&quot;&gt;&lt;div style=&quot;line-height: 21px&quot;&gt;&lt;div style=&quot;line-height: 21px&quot;&gt;&lt;span&gt;	&lt;/span&gt;//检查碰撞&lt;/div&gt;&lt;div style=&quot;line-height: 21px&quot;&gt;&lt;span&gt;	&lt;/span&gt;//计算路径&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#cce5ff;strokeColor=#36393d;" vertex="1" parent="1">
+          <mxGeometry x="2490" y="340" width="120" height="60" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>

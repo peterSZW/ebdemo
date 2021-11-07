@@ -24,8 +24,8 @@ import (
 
 var screenSize image.Point
 
-var home string
-var curpath string
+var homePath string
+var curPath string
 var errstr string
 
 var (
@@ -41,18 +41,17 @@ var btnDebug JoyButton
 var btnShowBox JoyButton
 var btnStart JoyButton
 
-var isShowText bool
-
-var spList map[string]*Sprite
+var bulletList map[string]*Sprite
 var enemyList map[string]*Sprite
-var effList map[string]*Sprite
-var spCount int
+var effctList map[string]*Sprite
+var spriteCount int
 
 type Gloable struct {
-	Life             int
-	Level            int
-	Score            int
-	ShowCollisionBox bool
+	Life               int
+	Level              int
+	Score              int
+	IsShowCollisionBox bool
+	IsShowText         bool
 }
 
 var path Path
@@ -62,15 +61,15 @@ var gv Gloable
 //初始化
 func init() {
 	//debug.SetGCPercent(-1)
-	spList = make(map[string]*Sprite)
+	bulletList = make(map[string]*Sprite)
 	enemyList = make(map[string]*Sprite)
-	effList = make(map[string]*Sprite)
+	effctList = make(map[string]*Sprite)
 
-	home = os.Getenv("HOME")
-	curpath = getCurrentDirectory()
+	homePath = os.Getenv("HOME")
+	curPath = getCurrentDirectory()
 	errstr = ""
 
-	f, err := os.Create(home + "/Library/Caches/output3.txt") //创建文件
+	f, err := os.Create(homePath + "/Library/Caches/output3.txt") //创建文件
 
 	if err == nil {
 		defer f.Close()
@@ -308,9 +307,9 @@ func GenEnemy() {
 
 		// newsprite.Start()
 
-		spCount++
+		spriteCount++
 
-		enemyList[strconv.Itoa(spCount)] = newsprite
+		enemyList[strconv.Itoa(spriteCount)] = newsprite
 
 	}
 }
@@ -328,8 +327,8 @@ func GenEnemy_level2() {
 		newsprite.Pause()
 		newsprite.Speed = float64(7 + rand.Intn(6))
 		newsprite.Direction = float64(270 - 20 + rand.Intn(40))
-		spCount++
-		enemyList[strconv.Itoa(spCount)] = newsprite
+		spriteCount++
+		enemyList[strconv.Itoa(spriteCount)] = newsprite
 		//===========
 		newsprite = NewSprite()
 		newsprite.AddAnimationByteCol("default", &images.E_ROBO1, 100, 1, 8, ebiten.FilterNearest)
@@ -339,8 +338,8 @@ func GenEnemy_level2() {
 		newsprite.Pause()
 		newsprite.Speed = float64(2 + rand.Intn(6))
 		newsprite.Direction = float64(0 - 20 + rand.Intn(40))
-		spCount++
-		enemyList[strconv.Itoa(spCount)] = newsprite
+		spriteCount++
+		enemyList[strconv.Itoa(spriteCount)] = newsprite
 
 		//===========
 		newsprite = NewSprite()
@@ -351,8 +350,8 @@ func GenEnemy_level2() {
 		newsprite.Pause()
 		newsprite.Speed = float64(2 + rand.Intn(6))
 		newsprite.Direction = float64(180 - 20 + rand.Intn(40))
-		spCount++
-		enemyList[strconv.Itoa(spCount)] = newsprite
+		spriteCount++
+		enemyList[strconv.Itoa(spriteCount)] = newsprite
 
 	}
 }
@@ -383,7 +382,7 @@ func (g *Game) Update() error {
 		robot.Position(float64(screenSize.X/2), float64(screenSize.Y/2)+100)
 
 		isFirstUpdate = false
-		isShowText = false
+		gv.IsShowText = false
 
 		gv.Level = 0
 	}
@@ -433,18 +432,18 @@ func (g *Game) Update() error {
 				newsprite.Speed = 5
 				newsprite.Start()
 
-				spCount++
+				spriteCount++
 
-				spList[strconv.Itoa(spCount)] = newsprite
+				bulletList[strconv.Itoa(spriteCount)] = newsprite
 			}
 		}
 
 		if btnDebug.GetJoyButton() || ebiten.IsKeyPressed(ebiten.KeyT) {
-			isShowText = !isShowText
+			gv.IsShowText = !gv.IsShowText
 		}
 
 		if btnShowBox.GetClicked() || ebiten.IsKeyPressed(ebiten.KeyC) {
-			gv.ShowCollisionBox = !gv.ShowCollisionBox
+			gv.IsShowCollisionBox = !gv.IsShowCollisionBox
 		}
 
 		if btnBullet.GetJoyButton() || ebiten.IsKeyPressed(ebiten.Key1) {
@@ -466,9 +465,9 @@ func (g *Game) Update() error {
 
 				//newsprite.Start()
 
-				spCount++
+				spriteCount++
 
-				spList[strconv.Itoa(spCount)] = newsprite
+				bulletList[strconv.Itoa(spriteCount)] = newsprite
 
 			}
 		}
@@ -488,7 +487,7 @@ func (g *Game) Update() error {
 			gv.Level = 1
 			gv.Life = 100
 			gv.Score = 0
-			spList = make(map[string]*Sprite)
+			bulletList = make(map[string]*Sprite)
 			sound.StopBgm(sound.BgmOutThere)
 			sound.PlayBgm(sound.BgmKindBattle)
 		}
@@ -501,7 +500,7 @@ func (g *Game) Update() error {
 
 		if gv.Life <= 0 {
 			gv.Level = 4
-			spList = make(map[string]*Sprite)
+			bulletList = make(map[string]*Sprite)
 			sound.StopBgm(sound.BgmKindBattle)
 			sound.PlayBgm(sound.BgmOutThere)
 		}
@@ -515,7 +514,7 @@ func (g *Game) Update() error {
 		GenEnemy_level2()
 		if gv.Life <= 0 {
 			gv.Level = 4
-			spList = make(map[string]*Sprite)
+			bulletList = make(map[string]*Sprite)
 			sound.StopBgm(sound.BgmKindBattle)
 			sound.PlayBgm(sound.BgmOutThere)
 		}
@@ -530,7 +529,7 @@ func (g *Game) Update() error {
 
 		if gv.Life <= 0 {
 			gv.Level = 4
-			spList = make(map[string]*Sprite)
+			bulletList = make(map[string]*Sprite)
 			sound.StopBgm(sound.BgmKindBattle)
 			sound.PlayBgm(sound.BgmOutThere)
 		}
@@ -547,7 +546,7 @@ func (g *Game) Update() error {
 		if btnStart.GetClicked() || btnShowBox.GetJoyButton() || ebiten.IsKeyPressed(ebiten.KeyS) {
 			gv.Level = 0
 			robot.Position(float64(screenSize.X/2), float64(screenSize.Y/2)+100)
-			spList = make(map[string]*Sprite)
+			bulletList = make(map[string]*Sprite)
 			sound.StopBgm(sound.BgmOutThere)
 			sound.PlayBgm(sound.BgmKindBattle)
 
@@ -560,7 +559,7 @@ func (g *Game) Update() error {
 		if btnStart.GetClicked() || btnShowBox.GetJoyButton() || ebiten.IsKeyPressed(ebiten.KeyS) {
 			gv.Level = 0
 			robot.Position(float64(screenSize.X/2), float64(screenSize.Y/2)+100)
-			spList = make(map[string]*Sprite)
+			bulletList = make(map[string]*Sprite)
 			sound.StopBgm(sound.BgmOutThere)
 			sound.PlayBgm(sound.BgmKindBattle)
 
@@ -569,11 +568,11 @@ func (g *Game) Update() error {
 	}
 
 	//删除越界的对象
-	for k, j := range spList {
+	for k, j := range bulletList {
 
 		if OutofScreen(j.X, j.Y, 20) {
 			j.Hide()
-			delete(spList, k)
+			delete(bulletList, k)
 		}
 	}
 
@@ -606,7 +605,7 @@ func (g *Game) Update() error {
 	touchStr = touchStr + "\n" + fmt.Sprintf("[%d]", joytouch.tid)
 	touchStr = touchStr + "\n" + fmt.Sprintf("[%f]", robot.Angle)
 
-	touchStr = touchStr + "\n" + fmt.Sprintf("[%v]", len(spList))
+	touchStr = touchStr + "\n" + fmt.Sprintf("[%v]", len(bulletList))
 	touchStr = touchStr + "\n" + fmt.Sprintf("[%v]", len(enemyList))
 
 	//延迟0.01毫秒
@@ -657,13 +656,13 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		paint.DrawText(screen, "YOU WIN！", screenSize.X/2-75, screenSize.Y/2, color.White, paint.FontSizeXLarge)
 
 	}
-	if isShowText {
+	if gv.IsShowText {
 
 		mx, my := ebiten.CursorPosition()
 
 		s := fmt.Sprintf("\n\n\n%s\n%s\nFPS : %f %d %d\n%v\n%s\n%s\n%s",
-			curpath, home, ebiten.CurrentFPS(), mx, my,
-			file_exist(home+"/Library/Caches/output3.txt"), errstr, runtime.GOOS, touchStr)
+			curPath, homePath, ebiten.CurrentFPS(), mx, my,
+			file_exist(homePath+"/Library/Caches/output3.txt"), errstr, runtime.GOOS, touchStr)
 		ebitenutil.DebugPrint(screen, s)
 	}
 
@@ -680,7 +679,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	btnShowBox.DrawBorders(screen, color.Gray16{0x1111})
 	//btnStart.DrawBorders(screen, color.Gray16{0x1111})
 
-	if gv.ShowCollisionBox {
+	if gv.IsShowCollisionBox {
 		drawCollideBox(screen, robot)
 	}
 
@@ -689,8 +688,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 	if gv.Level != 4 {
 
-		for _, j := range spList {
-			if gv.ShowCollisionBox {
+		for _, j := range bulletList {
+			if gv.IsShowCollisionBox {
 				drawCollideBox(screen, j)
 			}
 			j.Draw(screen)
@@ -699,17 +698,17 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	}
 
 	for _, j := range enemyList {
-		if gv.ShowCollisionBox {
+		if gv.IsShowCollisionBox {
 			drawCollideBox(screen, j)
 		}
 		j.Draw(screen)
 
 	}
 
-	for k, j := range effList {
+	for k, j := range effctList {
 		j.Draw(screen)
 		if j.GetStep() >= j.GetTotalStep()-1 {
-			delete(effList, k)
+			delete(effctList, k)
 		}
 	}
 
@@ -744,9 +743,9 @@ func checkCollision() {
 			newsprite.Direction = enemy.Direction
 			newsprite.Start()
 
-			spCount++
+			spriteCount++
 
-			effList[strconv.Itoa(spCount)] = newsprite
+			effctList[strconv.Itoa(spriteCount)] = newsprite
 
 			delete(enemyList, k)
 
@@ -767,9 +766,9 @@ func checkCollision() {
 				newsprite.CenterCoordonnates = true
 
 				newsprite.Start()
-				spCount++
+				spriteCount++
 
-				effList[strconv.Itoa(spCount)] = newsprite
+				effctList[strconv.Itoa(spriteCount)] = newsprite
 				sound.PlaySe(sound.SeKindBomb)
 				break
 
@@ -777,7 +776,7 @@ func checkCollision() {
 
 		}
 
-		for kshot, shot := range spList {
+		for kshot, shot := range bulletList {
 
 			if !IsCollideWith(enemy, shot) {
 				continue
@@ -795,14 +794,14 @@ func checkCollision() {
 				newsprite.Direction = enemy.Direction
 				newsprite.Start()
 
-				spCount++
+				spriteCount++
 
-				effList[strconv.Itoa(spCount)] = newsprite
+				effctList[strconv.Itoa(spriteCount)] = newsprite
 			}
 
 			gv.Score++
 			delete(enemyList, k)
-			delete(spList, kshot)
+			delete(bulletList, kshot)
 			sound.PlaySe(sound.SeKindHit2)
 
 		}

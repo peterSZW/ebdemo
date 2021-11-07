@@ -32,6 +32,8 @@ func getIncomingClientUdp(udpConnection *net.UDPConn) {
 		size, addr, err := udpConnection.ReadFromUDP(buffer)
 		if err != nil {
 			log.Println("Cant read packet!", err)
+			time.Sleep(10 * time.Second)
+
 			continue
 		}
 		log.Println(addr)

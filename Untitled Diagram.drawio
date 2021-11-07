@@ -1,6 +1,6 @@
-<mxfile host="app.diagrams.net" modified="2021-11-07T05:48:30.892Z" agent="5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.82 Safari/537.36" etag="OILh1LRBsNLWHF2dKFLj" version="15.7.0" type="github">
+<mxfile host="app.diagrams.net" modified="2021-11-07T09:50:24.985Z" agent="5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.82 Safari/537.36" etag="9ggMAawzcRjztLHQhBq0" version="15.7.0" type="github">
   <diagram id="tRa1csH4-88LfmXuXKnR" name="Page-1">
-    <mxGraphModel dx="2600" dy="725" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="2336" math="0" shadow="0">
+    <mxGraphModel dx="899" dy="549" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -8,19 +8,19 @@
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="4Wosh37YM3WKKmuV432c-1" value="开始" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
-          <mxGeometry x="72.5" y="80" width="70" height="40" as="geometry" />
+          <mxGeometry x="142.5" y="80" width="70" height="40" as="geometry" />
         </mxCell>
         <mxCell id="4Wosh37YM3WKKmuV432c-39" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="4Wosh37YM3WKKmuV432c-2" target="4Wosh37YM3WKKmuV432c-6">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="4Wosh37YM3WKKmuV432c-2" value="Update 开始" style="whiteSpace=wrap;html=1;" vertex="1" parent="1">
-          <mxGeometry x="230" y="87.5" width="115" height="25" as="geometry" />
+          <mxGeometry x="300" y="87.5" width="115" height="25" as="geometry" />
         </mxCell>
         <mxCell id="4Wosh37YM3WKKmuV432c-16" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="4Wosh37YM3WKKmuV432c-4" target="4Wosh37YM3WKKmuV432c-15">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="4Wosh37YM3WKKmuV432c-4" value="获取一个没满的房间" style="whiteSpace=wrap;html=1;fillColor=#FFFFCC;" vertex="1" parent="1">
-          <mxGeometry y="360" width="120" height="60" as="geometry" />
+          <mxGeometry x="70" y="360" width="120" height="60" as="geometry" />
         </mxCell>
         <mxCell id="4Wosh37YM3WKKmuV432c-9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="4Wosh37YM3WKKmuV432c-6" target="4Wosh37YM3WKKmuV432c-10">
           <mxGeometry relative="1" as="geometry" />
@@ -35,13 +35,13 @@
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="4Wosh37YM3WKKmuV432c-6" value="" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;" vertex="1" parent="1">
-          <mxGeometry x="390" y="87.5" width="25" height="25" as="geometry" />
+          <mxGeometry x="460" y="87.5" width="25" height="25" as="geometry" />
         </mxCell>
         <mxCell id="4Wosh37YM3WKKmuV432c-40" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="4Wosh37YM3WKKmuV432c-10" target="4Wosh37YM3WKKmuV432c-12">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="4Wosh37YM3WKKmuV432c-10" value="加入房间（场景）" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
-          <mxGeometry x="97.5" y="170" width="120" height="60" as="geometry" />
+          <mxGeometry x="167.5" y="170" width="120" height="60" as="geometry" />
         </mxCell>
         <mxCell id="4Wosh37YM3WKKmuV432c-19" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="4Wosh37YM3WKKmuV432c-12" target="4Wosh37YM3WKKmuV432c-17">
           <mxGeometry relative="1" as="geometry" />
@@ -50,19 +50,19 @@
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="4Wosh37YM3WKKmuV432c-12" value="房间有无过期？" style="rhombus;whiteSpace=wrap;html=1;" vertex="1" parent="1">
-          <mxGeometry x="117.5" y="270" width="80" height="80" as="geometry" />
+          <mxGeometry x="187.5" y="270" width="80" height="80" as="geometry" />
         </mxCell>
         <mxCell id="4Wosh37YM3WKKmuV432c-18" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="4Wosh37YM3WKKmuV432c-15" target="4Wosh37YM3WKKmuV432c-17">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="4Wosh37YM3WKKmuV432c-15" value="获取房间用户名称" style="whiteSpace=wrap;html=1;fillColor=#FFFFCC;" vertex="1" parent="1">
-          <mxGeometry y="450" width="120" height="60" as="geometry" />
+          <mxGeometry x="70" y="450" width="120" height="60" as="geometry" />
         </mxCell>
         <mxCell id="4Wosh37YM3WKKmuV432c-21" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="4Wosh37YM3WKKmuV432c-17" target="4Wosh37YM3WKKmuV432c-20">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="4Wosh37YM3WKKmuV432c-17" value="显示【加入房间】&lt;br&gt;按钮" style="whiteSpace=wrap;html=1;" vertex="1" parent="1">
-          <mxGeometry x="97.5" y="550" width="120" height="60" as="geometry" />
+          <mxGeometry x="167.5" y="550" width="120" height="60" as="geometry" />
         </mxCell>
         <mxCell id="4Wosh37YM3WKKmuV432c-28" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="1" source="4Wosh37YM3WKKmuV432c-20" target="4Wosh37YM3WKKmuV432c-27">
           <mxGeometry relative="1" as="geometry" />
@@ -71,37 +71,37 @@
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="4Wosh37YM3WKKmuV432c-20" value="有没有点击加入？" style="rhombus;whiteSpace=wrap;html=1;" vertex="1" parent="1">
-          <mxGeometry x="97.5" y="650" width="120" height="80" as="geometry" />
+          <mxGeometry x="167.5" y="650" width="120" height="80" as="geometry" />
         </mxCell>
         <mxCell id="4Wosh37YM3WKKmuV432c-26" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="4Wosh37YM3WKKmuV432c-23" target="4Wosh37YM3WKKmuV432c-2">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="4Wosh37YM3WKKmuV432c-23" value="Update 结束" style="whiteSpace=wrap;html=1;" vertex="1" parent="1">
-          <mxGeometry x="510" y="87.5" width="115" height="25" as="geometry" />
+          <mxGeometry x="580" y="87.5" width="115" height="25" as="geometry" />
         </mxCell>
         <mxCell id="4Wosh37YM3WKKmuV432c-33" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="4Wosh37YM3WKKmuV432c-27" target="4Wosh37YM3WKKmuV432c-29">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="4Wosh37YM3WKKmuV432c-27" value="加入房间" style="whiteSpace=wrap;html=1;fillColor=#FFFFCC;" vertex="1" parent="1">
-          <mxGeometry x="-10" y="730" width="120" height="60" as="geometry" />
+          <mxGeometry x="60" y="730" width="120" height="60" as="geometry" />
         </mxCell>
         <mxCell id="4Wosh37YM3WKKmuV432c-46" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="4Wosh37YM3WKKmuV432c-29" target="4Wosh37YM3WKKmuV432c-45">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="4Wosh37YM3WKKmuV432c-29" value="设置为【等到满员】下一个场景" style="whiteSpace=wrap;html=1;" vertex="1" parent="1">
-          <mxGeometry x="-8.75" y="830" width="117.5" height="60" as="geometry" />
+          <mxGeometry x="61.25" y="830" width="117.5" height="60" as="geometry" />
         </mxCell>
         <mxCell id="4Wosh37YM3WKKmuV432c-50" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="4Wosh37YM3WKKmuV432c-35" target="4Wosh37YM3WKKmuV432c-49">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="4Wosh37YM3WKKmuV432c-35" value="等到满员（场景）" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
-          <mxGeometry x="310" y="170" width="120" height="60" as="geometry" />
+          <mxGeometry x="380" y="170" width="120" height="60" as="geometry" />
         </mxCell>
         <mxCell id="4Wosh37YM3WKKmuV432c-48" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="4Wosh37YM3WKKmuV432c-45" target="4Wosh37YM3WKKmuV432c-10">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="4Wosh37YM3WKKmuV432c-45" value="" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
-          <mxGeometry x="97.5" y="930" width="120" height="80" as="geometry" />
+        <mxCell id="4Wosh37YM3WKKmuV432c-45" value="返回" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="167.5" y="930" width="120" height="80" as="geometry" />
         </mxCell>
         <mxCell id="4Wosh37YM3WKKmuV432c-52" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="4Wosh37YM3WKKmuV432c-49" target="4Wosh37YM3WKKmuV432c-51">
           <mxGeometry relative="1" as="geometry" />
@@ -115,45 +115,148 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="4Wosh37YM3WKKmuV432c-49" value="&lt;span style=&quot;color: rgb(50 , 50 , 50) ; font-size: 13px ; background-color: rgba(255 , 255 , 255 , 0.01)&quot;&gt;房间已经满？&lt;/span&gt;" style="rhombus;whiteSpace=wrap;html=1;" vertex="1" parent="1">
-          <mxGeometry x="330" y="280" width="80" height="80" as="geometry" />
+          <mxGeometry x="400" y="280" width="80" height="80" as="geometry" />
         </mxCell>
         <mxCell id="4Wosh37YM3WKKmuV432c-57" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="4Wosh37YM3WKKmuV432c-51" target="4Wosh37YM3WKKmuV432c-56">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="4Wosh37YM3WKKmuV432c-51" value="&lt;span style=&quot;color: rgb(50 , 50 , 50) ; font-size: 13px ; background-color: rgba(255 , 255 , 255 , 0.01)&quot;&gt;显示【退出房间】按钮&lt;/span&gt;" style="whiteSpace=wrap;html=1;" vertex="1" parent="1">
-          <mxGeometry x="310" y="390" width="120" height="60" as="geometry" />
+          <mxGeometry x="380" y="390" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="4Wosh37YM3WKKmuV432c-76" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="4Wosh37YM3WKKmuV432c-53" target="4Wosh37YM3WKKmuV432c-75">
+          <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="4Wosh37YM3WKKmuV432c-53" value="开始战斗（场景）" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
-          <mxGeometry x="580" y="170" width="120" height="60" as="geometry" />
+          <mxGeometry x="740" y="160" width="120" height="60" as="geometry" />
         </mxCell>
         <mxCell id="4Wosh37YM3WKKmuV432c-66" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="4Wosh37YM3WKKmuV432c-54" target="4Wosh37YM3WKKmuV432c-62">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="4Wosh37YM3WKKmuV432c-54" value="设置为下一个场景【开始战斗】" style="whiteSpace=wrap;html=1;" vertex="1" parent="1">
-          <mxGeometry x="440" y="290" width="120" height="60" as="geometry" />
+          <mxGeometry x="510" y="290" width="120" height="60" as="geometry" />
         </mxCell>
         <mxCell id="4Wosh37YM3WKKmuV432c-58" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="1" source="4Wosh37YM3WKKmuV432c-56" target="4Wosh37YM3WKKmuV432c-62">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="370" y="580" as="targetPoint" />
+            <mxPoint x="440" y="580" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="4Wosh37YM3WKKmuV432c-64" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="4Wosh37YM3WKKmuV432c-56" target="4Wosh37YM3WKKmuV432c-63">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="4Wosh37YM3WKKmuV432c-56" value="有没有按退出房间" style="rhombus;whiteSpace=wrap;html=1;" vertex="1" parent="1">
-          <mxGeometry x="330" y="490" width="80" height="80" as="geometry" />
+          <mxGeometry x="400" y="490" width="80" height="80" as="geometry" />
         </mxCell>
         <mxCell id="4Wosh37YM3WKKmuV432c-65" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="4Wosh37YM3WKKmuV432c-62" target="4Wosh37YM3WKKmuV432c-35">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="4Wosh37YM3WKKmuV432c-62" value="" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
-          <mxGeometry x="325" y="630" width="90" height="40" as="geometry" />
+        <mxCell id="4Wosh37YM3WKKmuV432c-62" value="返回" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="395" y="630" width="90" height="40" as="geometry" />
         </mxCell>
         <mxCell id="4Wosh37YM3WKKmuV432c-67" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="4Wosh37YM3WKKmuV432c-63" target="4Wosh37YM3WKKmuV432c-62">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="4Wosh37YM3WKKmuV432c-63" value="设置为下一个场景【加入房间】" style="whiteSpace=wrap;html=1;" vertex="1" parent="1">
-          <mxGeometry x="440" y="500" width="120" height="60" as="geometry" />
+          <mxGeometry x="510" y="500" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="4Wosh37YM3WKKmuV432c-78" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="4Wosh37YM3WKKmuV432c-75" target="4Wosh37YM3WKKmuV432c-77">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="4Wosh37YM3WKKmuV432c-75" value="&lt;span style=&quot;color: rgb(50 , 50 , 50) ; font-size: 13px ; background-color: rgba(255 , 255 , 255 , 0.01)&quot;&gt;发送xy坐标给服务器&lt;/span&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;" vertex="1" parent="1">
+          <mxGeometry x="740" y="290" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="4Wosh37YM3WKKmuV432c-96" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="4Wosh37YM3WKKmuV432c-77" target="4Wosh37YM3WKKmuV432c-95">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="4Wosh37YM3WKKmuV432c-99" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="4Wosh37YM3WKKmuV432c-77" target="4Wosh37YM3WKKmuV432c-98">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="4Wosh37YM3WKKmuV432c-77" value="胜利与否？" style="rhombus;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="760" y="410" width="80" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="4Wosh37YM3WKKmuV432c-81" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="4Wosh37YM3WKKmuV432c-79" target="4Wosh37YM3WKKmuV432c-80">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="4Wosh37YM3WKKmuV432c-79" value="&lt;span style=&quot;color: rgb(50 , 50 , 50) ; font-size: 13px ; background-color: rgba(255 , 255 , 255 , 0.01)&quot;&gt;得到所有角色坐标&lt;/span&gt;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="1060.06" y="290" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="4Wosh37YM3WKKmuV432c-83" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" target="4Wosh37YM3WKKmuV432c-87">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1130.06" y="430" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="4Wosh37YM3WKKmuV432c-80" value="&lt;span style=&quot;color: rgb(50 , 50 , 50) ; font-size: 13px ; background-color: rgba(255 , 255 , 255 , 0.01)&quot;&gt;设置所有角色坐标且判断碰撞&lt;/span&gt;" style="whiteSpace=wrap;html=1;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="1060.06" y="400" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="4Wosh37YM3WKKmuV432c-85" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="4Wosh37YM3WKKmuV432c-82" target="4Wosh37YM3WKKmuV432c-84">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="4Wosh37YM3WKKmuV432c-92" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="4Wosh37YM3WKKmuV432c-82" target="4Wosh37YM3WKKmuV432c-79">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1210.06" y="660" />
+              <mxPoint x="1210.06" y="320" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="4Wosh37YM3WKKmuV432c-94" value="没有分出胜负" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="4Wosh37YM3WKKmuV432c-92">
+          <mxGeometry x="-0.854" relative="1" as="geometry">
+            <mxPoint x="19" y="-20" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="4Wosh37YM3WKKmuV432c-82" value="&lt;span style=&quot;color: rgb(50 , 50 , 50) ; font-size: 13px ; background-color: rgba(255 , 255 , 255 , 0.01)&quot;&gt;判断胜负&lt;/span&gt;" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFFFCC;" vertex="1" parent="1">
+          <mxGeometry x="1080.06" y="620" width="80" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="4Wosh37YM3WKKmuV432c-91" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="4Wosh37YM3WKKmuV432c-84" target="4Wosh37YM3WKKmuV432c-90">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="4Wosh37YM3WKKmuV432c-84" value="&lt;span style=&quot;color: rgb(50 , 50 , 50) ; font-size: 13px ; background-color: rgba(255 , 255 , 255 , 0.01)&quot;&gt;设置胜负标识&lt;/span&gt;" style="whiteSpace=wrap;html=1;fillColor=#FFFFCC;" vertex="1" parent="1">
+          <mxGeometry x="1065.06" y="730" width="110" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="4Wosh37YM3WKKmuV432c-102" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="4Wosh37YM3WKKmuV432c-86" target="4Wosh37YM3WKKmuV432c-97">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="4Wosh37YM3WKKmuV432c-86" value="发送退出房间信息&lt;br&gt;中途离开=1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFCC;" vertex="1" parent="1">
+          <mxGeometry x="740" y="670" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="4Wosh37YM3WKKmuV432c-88" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="4Wosh37YM3WKKmuV432c-87" target="4Wosh37YM3WKKmuV432c-82">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="4Wosh37YM3WKKmuV432c-89" value="否" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="4Wosh37YM3WKKmuV432c-88">
+          <mxGeometry x="-0.4515" y="2" relative="1" as="geometry">
+            <mxPoint x="-2" y="13" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="4Wosh37YM3WKKmuV432c-93" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="4Wosh37YM3WKKmuV432c-87" target="4Wosh37YM3WKKmuV432c-90">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="4Wosh37YM3WKKmuV432c-87" value="是否中途离开=1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFFFCC;" vertex="1" parent="1">
+          <mxGeometry x="1080.06" y="490" width="80" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="4Wosh37YM3WKKmuV432c-90" value="结束" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="1075.06" y="820" width="90" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="4Wosh37YM3WKKmuV432c-101" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="4Wosh37YM3WKKmuV432c-95" target="4Wosh37YM3WKKmuV432c-86">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="4Wosh37YM3WKKmuV432c-103" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="4Wosh37YM3WKKmuV432c-95" target="4Wosh37YM3WKKmuV432c-97">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="700" y="585" />
+              <mxPoint x="700" y="800" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="4Wosh37YM3WKKmuV432c-95" value="退出房间按钮有没有按下？" style="rhombus;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="760" y="545" width="80" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="4Wosh37YM3WKKmuV432c-97" value="返回" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="755" y="780" width="90" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="4Wosh37YM3WKKmuV432c-100" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="4Wosh37YM3WKKmuV432c-98" target="4Wosh37YM3WKKmuV432c-97">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="4Wosh37YM3WKKmuV432c-98" value="设置【you win/ you lost 场景】" style="whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="900" y="420" width="120" height="60" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>

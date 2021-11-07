@@ -5,12 +5,12 @@ import (
 	"image"
 	"image/color"
 	_ "image/png"
+	"io/ioutil"
 	"math"
 	"math/rand"
 	"os"
 	"path/filepath"
 	"runtime"
-	"strconv"
 	"strings"
 	"time"
 
@@ -20,13 +20,16 @@ import (
 	"github.com/peterSZW/ebdemo/ebgame/paint"
 	"github.com/peterSZW/ebdemo/ebgame/resources/images"
 	"github.com/peterSZW/ebdemo/ebgame/sound"
+	uuid "github.com/satori/go.uuid"
+	yaml "gopkg.in/yaml.v2"
 )
 
 var screenSize image.Point
 
 var homePath string
-var curPath string
-var errstr string
+
+//var curPath string
+//var errstr string
 
 var (
 	robot     *Sprite
@@ -41,10 +44,10 @@ var btnDebug JoyButton
 var btnShowBox JoyButton
 var btnStart JoyButton
 
-var bulletList map[string]*Sprite
-var enemyList map[string]*Sprite
-var effctList map[string]*Sprite
-var spriteCount int
+var bulletList map[int64]*Sprite
+var enemyList map[int64]*Sprite
+var effctList map[int64]*Sprite
+var spriteCount int64
 
 type Gloable struct {
 	Life               int
@@ -58,29 +61,71 @@ var path Path
 
 var gv Gloable
 
+const yamlFile = "/Library/Caches/ebdemo.yaml"
+
+func checkError(err error) {
+	if err != nil {
+		panic(err)
+	}
+}
+
+type GameConfig struct {
+	Uuid      string `yaml:"Uuid"`
+	HighScore int    `yaml:"HighScore"`
+}
+
+var gamecfg GameConfig
+
+func writeToYaml(src string) {
+	id := uuid.NewV4()
+	ids := id.String()
+	gamecfg.Uuid = ids
+	data, err := yaml.Marshal(gamecfg) // 第二个表示每行的前缀，这里不用，第三个是缩进符号，这里用tab
+	checkError(err)
+	err = ioutil.WriteFile(src, data, 0777)
+	checkError(err)
+}
+func readFromYaml(src string) {
+	content, err := ioutil.ReadFile(src)
+	checkError(err)
+	err = yaml.Unmarshal(content, &gamecfg)
+	checkError(err)
+}
+
 //初始化
 func init() {
 	//debug.SetGCPercent(-1)
-	bulletList = make(map[string]*Sprite)
-	enemyList = make(map[string]*Sprite)
-	effctList = make(map[string]*Sprite)
+	bulletList = make(map[int64]*Sprite)
+	enemyList = make(map[int64]*Sprite)
+	effctList = make(map[int64]*Sprite)
 
 	homePath = os.Getenv("HOME")
-	curPath = getCurrentDirectory()
-	errstr = ""
+	//curPath = getCurrentDirectory()
+	//errstr = ""
 
-	f, err := os.Create(homePath + "/Library/Caches/output3.txt") //创建文件
+	if file_exist(homePath + yamlFile) {
+		readFromYaml(homePath + yamlFile)
+		//读配置
 
-	if err == nil {
-		defer f.Close()
-		_, err = f.WriteString("writesn") //写入文件(字节数组)
-
-		f.Sync()
+	} else {
+		writeToYaml(homePath + yamlFile)
 	}
-	if err != nil {
-		errstr = err.Error()
+	//errstr = gamecfg.Uuid
 
-	}
+	// f, err := os.Create(homePath + yamlFile) //创建文件
+
+	// if err == nil {
+	// 	defer f.Close()
+	// 	id := uuid.NewV4()
+	// 	ids := id.String()
+	// 	_, err = f.WriteString(ids) //写入文件(字节数组)
+
+	// 	f.Sync()
+	// }
+	// if err != nil {
+	// 	errstr = err.Error()
+
+	// }
 
 	robot = NewSprite()
 	robot.AddAnimationByte("default", &images.E_ROBO2, 2000, 8, ebiten.FilterNearest)
@@ -309,7 +354,8 @@ func GenEnemy() {
 
 		spriteCount++
 
-		enemyList[strconv.Itoa(spriteCount)] = newsprite
+		//enemyList[spriteCount] = newsprite
+		enemyList[(spriteCount)] = newsprite
 
 	}
 }
@@ -328,7 +374,7 @@ func GenEnemy_level2() {
 		newsprite.Speed = float64(7 + rand.Intn(6))
 		newsprite.Direction = float64(270 - 20 + rand.Intn(40))
 		spriteCount++
-		enemyList[strconv.Itoa(spriteCount)] = newsprite
+		enemyList[spriteCount] = newsprite
 		//===========
 		newsprite = NewSprite()
 		newsprite.AddAnimationByteCol("default", &images.E_ROBO1, 100, 1, 8, ebiten.FilterNearest)
@@ -339,7 +385,7 @@ func GenEnemy_level2() {
 		newsprite.Speed = float64(2 + rand.Intn(6))
 		newsprite.Direction = float64(0 - 20 + rand.Intn(40))
 		spriteCount++
-		enemyList[strconv.Itoa(spriteCount)] = newsprite
+		enemyList[spriteCount] = newsprite
 
 		//===========
 		newsprite = NewSprite()
@@ -351,7 +397,7 @@ func GenEnemy_level2() {
 		newsprite.Speed = float64(2 + rand.Intn(6))
 		newsprite.Direction = float64(180 - 20 + rand.Intn(40))
 		spriteCount++
-		enemyList[strconv.Itoa(spriteCount)] = newsprite
+		enemyList[spriteCount] = newsprite
 
 	}
 }
@@ -434,7 +480,7 @@ func (g *Game) Update() error {
 
 				spriteCount++
 
-				bulletList[strconv.Itoa(spriteCount)] = newsprite
+				bulletList[spriteCount] = newsprite
 			}
 		}
 
@@ -467,7 +513,7 @@ func (g *Game) Update() error {
 
 				spriteCount++
 
-				bulletList[strconv.Itoa(spriteCount)] = newsprite
+				bulletList[spriteCount] = newsprite
 
 			}
 		}
@@ -487,7 +533,7 @@ func (g *Game) Update() error {
 			gv.Level = 1
 			gv.Life = 100
 			gv.Score = 0
-			bulletList = make(map[string]*Sprite)
+			bulletList = make(map[int64]*Sprite)
 			sound.StopBgm(sound.BgmOutThere)
 			sound.PlayBgm(sound.BgmKindBattle)
 		}
@@ -500,7 +546,7 @@ func (g *Game) Update() error {
 
 		if gv.Life <= 0 {
 			gv.Level = 4
-			bulletList = make(map[string]*Sprite)
+			bulletList = make(map[int64]*Sprite)
 			sound.StopBgm(sound.BgmKindBattle)
 			sound.PlayBgm(sound.BgmOutThere)
 		}
@@ -514,7 +560,7 @@ func (g *Game) Update() error {
 		GenEnemy_level2()
 		if gv.Life <= 0 {
 			gv.Level = 4
-			bulletList = make(map[string]*Sprite)
+			bulletList = make(map[int64]*Sprite)
 			sound.StopBgm(sound.BgmKindBattle)
 			sound.PlayBgm(sound.BgmOutThere)
 		}
@@ -529,7 +575,7 @@ func (g *Game) Update() error {
 
 		if gv.Life <= 0 {
 			gv.Level = 4
-			bulletList = make(map[string]*Sprite)
+			bulletList = make(map[int64]*Sprite)
 			sound.StopBgm(sound.BgmKindBattle)
 			sound.PlayBgm(sound.BgmOutThere)
 		}
@@ -546,7 +592,7 @@ func (g *Game) Update() error {
 		if btnStart.GetClicked() || btnShowBox.GetJoyButton() || ebiten.IsKeyPressed(ebiten.KeyS) {
 			gv.Level = 0
 			robot.Position(float64(screenSize.X/2), float64(screenSize.Y/2)+100)
-			bulletList = make(map[string]*Sprite)
+			bulletList = make(map[int64]*Sprite)
 			sound.StopBgm(sound.BgmOutThere)
 			sound.PlayBgm(sound.BgmKindBattle)
 
@@ -559,7 +605,7 @@ func (g *Game) Update() error {
 		if btnStart.GetClicked() || btnShowBox.GetJoyButton() || ebiten.IsKeyPressed(ebiten.KeyS) {
 			gv.Level = 0
 			robot.Position(float64(screenSize.X/2), float64(screenSize.Y/2)+100)
-			bulletList = make(map[string]*Sprite)
+			bulletList = make(map[int64]*Sprite)
 			sound.StopBgm(sound.BgmOutThere)
 			sound.PlayBgm(sound.BgmKindBattle)
 
@@ -660,9 +706,11 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 		mx, my := ebiten.CursorPosition()
 
-		s := fmt.Sprintf("\n\n\n%s\n%s\nFPS : %f %d %d\n%v\n%s\n%s\n%s",
-			curPath, homePath, ebiten.CurrentFPS(), mx, my,
-			file_exist(homePath+"/Library/Caches/output3.txt"), errstr, runtime.GOOS, touchStr)
+		s := fmt.Sprintf("\n\n\n%s\nFPS : %f %d %d\n%v\n%s\n%s\n%s",
+			homePath, ebiten.CurrentFPS(), mx, my,
+			file_exist(homePath+yamlFile), gamecfg.Uuid, runtime.GOOS, touchStr)
+
+		//curPath,
 		ebitenutil.DebugPrint(screen, s)
 	}
 
@@ -745,7 +793,7 @@ func checkCollision() {
 
 			spriteCount++
 
-			effctList[strconv.Itoa(spriteCount)] = newsprite
+			effctList[spriteCount] = newsprite
 
 			delete(enemyList, k)
 
@@ -768,7 +816,7 @@ func checkCollision() {
 				newsprite.Start()
 				spriteCount++
 
-				effctList[strconv.Itoa(spriteCount)] = newsprite
+				effctList[spriteCount] = newsprite
 				sound.PlaySe(sound.SeKindBomb)
 				break
 
@@ -796,7 +844,7 @@ func checkCollision() {
 
 				spriteCount++
 
-				effctList[strconv.Itoa(spriteCount)] = newsprite
+				effctList[spriteCount] = newsprite
 			}
 
 			gv.Score++

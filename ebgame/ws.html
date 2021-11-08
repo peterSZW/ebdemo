@@ -1,0 +1,15 @@
+<script>
+function Socket(url){
+    ws = new WebSocket(url);
+    ws.onmessage = function(e) { console.log(e.data); };
+    ws.onclose = function(){
+        // Try to reconnect in 5 seconds
+        setTimeout(function(){Socket(url)}, 5000);
+    };
+}
+
+ 
+
+Socket("ws://192.168.2.218:7800/ws/ca59cb90-7a43-4f96-acc3-086205136bf1/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjoiY2E1OWNiOTAtN2E0My00Zjk2LWFjYzMtMDg2MjA1MTM2YmYxQDE2MzYzODIyNTciLCJ0aW1lc3RhbXAiOjE2MzYzODIyNTd9.kLE2mteRWHrcfnFw1k8nwzgnNwFZNFM9VUKpICg0xao");
+
+</script>

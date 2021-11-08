@@ -208,11 +208,14 @@ func (c *ChatClient) DeleteChannel(channel string) (bool, error) {
 	method := "DELETE"
 	url := "/api/channel/"
 
-	_, err := c.command(method, url+channel, "")
+	body, err := c.command(method, url+channel, "")
 
 	if err != nil {
+
 		return false, err
+
 	}
+	log.Print(string(body))
 	return true, nil
 }
 

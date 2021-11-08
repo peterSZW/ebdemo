@@ -53,11 +53,22 @@ func testmain() {
 	channal, _ := chat.GetChannel(channame)
 	fmt.Println(channal)
 
-	// rsp, _ := chat.CreateClient([]string{channame})
+	// rsp, _ := chat.CreateClient([]string{})
 
 	// fmt.Println(rsp)
 
 	v3, err = chat.PublishChannel(channame, `{"message":"hello world!!!!!!!!!"}`)
 	fmt.Println(v3, err)
+	//9b7090b7-1028-4299-ba56-7a1423f6c545
+
+	rsp, _ := chat.GetClient("ca59cb90-7a43-4f96-acc3-086205136bf1")
+	fmt.Println(rsp)
+
+	v3, _ = chat.DeleteChannel(channame)
+	fmt.Println(v3, err)
+	rsp, _ = chat.GetClient("ca59cb90-7a43-4f96-acc3-086205136bf1")
+	fmt.Println(rsp)
+	rsp, _ = chat.GetClient("9b7090b7-1028-4299-ba56-7a1423f6c545")
+	fmt.Println(rsp)
 
 }

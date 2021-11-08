@@ -5,6 +5,7 @@ go 1.17
 require github.com/hajimehoshi/ebiten/v2 v2.2.1
 
 require (
+	github.com/domgolonka/beavergo v0.0.0-20210228172353-5c4d948cb019 // indirect
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20210727001814-0db043d8d5be // indirect
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0 // indirect
 	github.com/hajimehoshi/go-mp3 v0.3.2 // indirect

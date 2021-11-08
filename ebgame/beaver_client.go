@@ -48,4 +48,16 @@ func testmain() {
 	fmt.Println("UpdateConfig", v2, err)
 	v3, err := chat.DeleteConfig(key)
 	fmt.Println("DeleteConfig", v3, err)
+	channame := "game_room_1"
+	chat.CreateChannel(channame, "public")
+	channal, _ := chat.GetChannel(channame)
+	fmt.Println(channal)
+
+	// rsp, _ := chat.CreateClient([]string{channame})
+
+	// fmt.Println(rsp)
+
+	v3, err = chat.PublishChannel(channame, `{"message":"hello world!!!!!!!!!"}`)
+	fmt.Println(v3, err)
+
 }

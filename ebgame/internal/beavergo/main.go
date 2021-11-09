@@ -229,6 +229,7 @@ func (c *ChatClient) CreateClient(channel []string) (*ClientResp, error) {
 	if err != nil {
 		return nil, err
 	}
+	log.Println(string(body))
 	var clientresp *ClientResp
 	err = json.Unmarshal(body, &clientresp)
 	if err != nil {

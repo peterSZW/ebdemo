@@ -6,6 +6,7 @@ import (
 	"image/color"
 	_ "image/png"
 	"io/ioutil"
+	"log"
 	"math"
 	"math/rand"
 	"os"
@@ -20,7 +21,6 @@ import (
 	"github.com/peterSZW/ebdemo/ebgame/paint"
 	"github.com/peterSZW/ebdemo/ebgame/resources/images"
 	"github.com/peterSZW/ebdemo/ebgame/sound"
-	uuid "github.com/satori/go.uuid"
 	yaml "gopkg.in/yaml.v2"
 )
 
@@ -33,6 +33,7 @@ var homePath string
 
 var (
 	robot     *Sprite
+	robot2    *Sprite
 	robotpath *Sprite
 	touchpad  *Sprite
 )
@@ -71,15 +72,16 @@ func checkError(err error) {
 
 type GameConfig struct {
 	Uuid      string `yaml:"Uuid"`
+	Token     string `yaml:"Token"`
 	HighScore int    `yaml:"HighScore"`
 }
 
 var gamecfg GameConfig
 
 func writeToYaml(src string) {
-	id := uuid.NewV4()
-	ids := id.String()
-	gamecfg.Uuid = ids
+	// id := uuid.NewV4()
+	// ids := id.String()
+	// gamecfg.Uuid = ids
 	data, err := yaml.Marshal(gamecfg) // 第二个表示每行的前缀，这里不用，第三个是缩进符号，这里用tab
 	checkError(err)
 	err = ioutil.WriteFile(src, data, 0777)
@@ -92,9 +94,12 @@ func readFromYaml(src string) {
 	checkError(err)
 }
 
+const chan_name = "game_room_1"
+
 //初始化
 func init() {
 	//debug.SetGCPercent(-1)
+	fmt.Println("init main")
 	bulletList = make(map[int64]*Sprite)
 	enemyList = make(map[int64]*Sprite)
 	effctList = make(map[int64]*Sprite)
@@ -105,11 +110,51 @@ func init() {
 
 	if file_exist(homePath + yamlFile) {
 		readFromYaml(homePath + yamlFile)
+
+		fmt.Println("READ:", gamecfg)
 		//读配置
 
-	} else {
+	}
+
+	if gamecfg.Uuid != "" {
+
+		rsp, err := chat.GetClient(gamecfg.Uuid)
+		fmt.Println("GetClient:", rsp)
+		if err != nil {
+			log.Println(err)
+			gamecfg.Uuid = ""
+			//fmt.Println(rsp)
+		} else {
+
+			gamecfg.Uuid = rsp.ID
+			gamecfg.Token = rsp.Token
+		}
+	}
+
+	if gamecfg.Uuid == "" {
+		_, err := chat.CreateChannel(chan_name, "public")
+		if err != nil {
+			log.Println(err)
+
+		}
+
+		rsp, err := chat.CreateClient([]string{chan_name})
+		fmt.Println(rsp)
+		if err == nil {
+			gamecfg.Uuid = rsp.ID
+			gamecfg.Token = rsp.ID
+		} else {
+			log.Println(err)
+		}
+
+	}
+
+	if gamecfg.Uuid != "" {
 		writeToYaml(homePath + yamlFile)
 	}
+
+	log.Println(gamecfg)
+
 	//errstr = gamecfg.Uuid
 
 	// f, err := os.Create(homePath + yamlFile) //创建文件
@@ -133,6 +178,14 @@ func init() {
 	robot.Position(float64(screenSize.X/2), float64(screenSize.Y/2)+100)
 	robot.CenterCoordonnates = true
 	robot.Start()
+
+	robot2 = NewSprite()
+	robot2.AddAnimationByte("default", &images.E_ROBO2, 2000, 8, ebiten.FilterNearest)
+	robot2.Name = "E_ROBO2"
+	robot2.Position(float64(screenSize.X/2), float64(screenSize.Y/2)+100)
+	robot2.CenterCoordonnates = true
+	robot2.Start()
+	robot2.Pause()
 
 	robotpath = NewSprite()
 	robotpath.AddAnimationByte("default", &images.E_SHOOTER1, 2000, 8, ebiten.FilterNearest)
@@ -174,9 +227,11 @@ func init() {
 
 	gv.Life = 100
 
-	client()
-	login()
-	go loopUpdate()
+	go ws_client()
+
+	// client()
+	// login()
+	// go loopUpdate()
 
 }
 
@@ -408,6 +463,8 @@ var lastLaserTime time.Time
 var degree float64
 
 //循环计算
+var lastnetxx float64
+var lastnetyy float64
 
 func movePlanAndFireBullet() {
 	//移动飞机
@@ -499,6 +556,16 @@ func movePlanAndFireBullet() {
 		touchpad.Y = float64(joytouch.y)
 	}
 	touchStr = touchStr + "\n" + fmt.Sprintf("PAD:[%f,%f] DEG:[%f]", xx, yy, GetDegreeByXY(xx, yy))
+
+	//sent to network
+	if robot.X != lastnetxx || robot.Y != lastnetyy {
+		lastnetxx = robot.X
+
+		lastnetyy = robot.Y
+
+		chat.PublishChannel(chan_name, fmt.Sprintf(`{"message":"%f,%f","id":"%s"}`, lastnetxx, lastnetyy, gamecfg.Uuid))
+
+	}
 
 }
 
@@ -729,6 +796,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 	robotpath.Draw(screen)
 	robot.Draw(screen)
+	robot2.Draw(screen)
 
 	if gv.Level != 4 {
 

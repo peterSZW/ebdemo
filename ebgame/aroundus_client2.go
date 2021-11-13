@@ -119,6 +119,19 @@ func loopUpdate() {
 	}
 
 }
+func headtbeat() {
+	for {
+		user.Uuid = gamecfg.Uuid
+
+		packetToSend := packet.StampPacket(user.Uuid, nil, packet.HeartBeat)
+
+		_, err := packetToSend.SendUdpStream2(udpConnection)
+		if err != nil {
+			log.Println(err)
+		}
+		time.Sleep(time.Duration(10 * time.Second))
+	}
+}
 
 func Dial() {
 
@@ -174,6 +187,7 @@ func client() {
 
 	} else {
 		go getIncomingClientUdp(udpConnection)
+		go headtbeat()
 		//ClientConsoleCLI(udpConnection)
 	}
 

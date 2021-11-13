@@ -21,6 +21,7 @@ import (
 	"github.com/peterSZW/ebdemo/ebgame/paint"
 	"github.com/peterSZW/ebdemo/ebgame/resources/images"
 	"github.com/peterSZW/ebdemo/ebgame/sound"
+	uuid "github.com/satori/go.uuid"
 	yaml "gopkg.in/yaml.v2"
 )
 
@@ -117,37 +118,48 @@ func init() {
 	}
 
 	if gamecfg.Uuid != "" {
+		if beaver_enable {
 
-		rsp, err := chat.GetClient(gamecfg.Uuid)
-		fmt.Println("GetClient:", rsp)
-		if err != nil {
-			log.Println(err)
-			gamecfg.Uuid = ""
-			//fmt.Println(rsp)
-		} else {
+			rsp, err := beaverChat.GetClient(gamecfg.Uuid)
+			fmt.Println("GetClient:", rsp)
+			if err != nil {
+				log.Println(err)
+				gamecfg.Uuid = ""
+				//fmt.Println(rsp)
+			} else {
 
-			gamecfg.Uuid = rsp.ID
-			gamecfg.Token = rsp.Token
+				gamecfg.Uuid = rsp.ID
+				gamecfg.Token = rsp.Token
+			}
 		}
 	}
 
 	if gamecfg.Uuid == "" {
-		_, err := chat.CreateChannel(chan_name, "public")
-		if err != nil {
-			log.Println(err)
+		if beaver_enable {
+			_, err := beaverChat.CreateChannel(chan_name, "public")
+			if err != nil {
+				log.Println(err)
 
-		}
+			}
 
-		rsp, err := chat.CreateClient([]string{chan_name})
-		fmt.Println(rsp)
-		if err == nil {
-			gamecfg.Uuid = rsp.ID
-			gamecfg.Token = rsp.ID
-		} else {
-			log.Println(err)
+			rsp, err := beaverChat.CreateClient([]string{chan_name})
+			fmt.Println(rsp)
+			if err == nil {
+				gamecfg.Uuid = rsp.ID
+				gamecfg.Token = rsp.ID
+			} else {
+				log.Println(err)
+			}
 		}
 
 	}
+	if aroundus_enable {
+		gamecfg.Uuid = uuid.NewV4().String()
+	}
+
+	client()
+	NewUser()
+	Dial()
 
 	if gamecfg.Uuid != "" {
 		writeToYaml(homePath + yamlFile)
@@ -563,7 +575,13 @@ func movePlanAndFireBullet() {
 
 		lastnetyy = robot.Y
 
-		chat.PublishChannel(chan_name, fmt.Sprintf(`{"message":"%f,%f","id":"%s"}`, lastnetxx, lastnetyy, gamecfg.Uuid))
+		if beaver_enable {
+			beaverChat.PublishChannel(chan_name, fmt.Sprintf(`{"message":"%f,%f","id":"%s"}`, lastnetxx, lastnetyy, gamecfg.Uuid))
+		}
+		if aroundus_enable {
+			UpdatePosNow()
+			//beaverChat.PublishChannel(chan_name, fmt.Sprintf(`{"message":"%f,%f","id":"%s"}`, lastnetxx, lastnetyy, gamecfg.Uuid))
+		}
 
 	}
 

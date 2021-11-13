@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
+	"github.com/xiaomi-tc/log15"
 )
 
 var addr = flag.String("addr", "192.168.2.218:7800", "http service address")
@@ -57,7 +58,8 @@ func ws_client() {
 
 	c, _, err := websocket.DefaultDialer.Dial(u.String(), nil)
 	if err != nil {
-		log.Fatal("dial:", err)
+		log15.Error("dial:", "err", err)
+		return
 	}
 	defer c.Close()
 

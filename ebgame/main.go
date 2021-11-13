@@ -570,10 +570,11 @@ func movePlanAndFireBullet() {
 	touchStr = touchStr + "\n" + fmt.Sprintf("PAD:[%f,%f] DEG:[%f]", xx, yy, GetDegreeByXY(xx, yy))
 
 	//sent to network
-	if robot.X != lastnetxx || robot.Y != lastnetyy {
-		lastnetxx = robot.X
 
-		lastnetyy = robot.Y
+	if math.Round(robot.X) != lastnetxx || math.Round(robot.Y) != lastnetyy {
+		lastnetxx = math.Round(robot.X)
+
+		lastnetyy = math.Round(robot.Y)
 
 		if beaver_enable {
 			beaverChat.PublishChannel(chan_name, fmt.Sprintf(`{"message":"%f,%f","id":"%s"}`, lastnetxx, lastnetyy, gamecfg.Uuid))

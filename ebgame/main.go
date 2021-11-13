@@ -478,6 +478,8 @@ var degree float64
 var lastnetxx float64
 var lastnetyy float64
 
+var roundx, roundy float64
+
 func movePlanAndFireBullet() {
 	//移动飞机
 	xx, yy, _ := joytouch.GetJoyTouchXY()
@@ -570,11 +572,13 @@ func movePlanAndFireBullet() {
 	touchStr = touchStr + "\n" + fmt.Sprintf("PAD:[%f,%f] DEG:[%f]", xx, yy, GetDegreeByXY(xx, yy))
 
 	//sent to network
+	roundx = math.Round(robot.X)
+	roundy = math.Round(robot.Y)
 
-	if math.Round(robot.X) != lastnetxx || math.Round(robot.Y) != lastnetyy {
-		lastnetxx = math.Round(robot.X)
+	if roundx != lastnetxx || roundy != lastnetyy {
+		lastnetxx = roundx
 
-		lastnetyy = math.Round(robot.Y)
+		lastnetyy = roundy
 
 		if beaver_enable {
 			beaverChat.PublishChannel(chan_name, fmt.Sprintf(`{"message":"%f,%f","id":"%s"}`, lastnetxx, lastnetyy, gamecfg.Uuid))

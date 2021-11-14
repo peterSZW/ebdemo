@@ -651,7 +651,7 @@ func (sprite *Sprite) Draw(surface *ebiten.Image) {
 		x1 := x0 + currentAnimation.StepWidth
 		y0 := row * currentAnimation.StepWidth
 		y1 := y0 + currentAnimation.StepWidth
-		//fmt.Println(x0, x1, y0, y1, col, row, currentAnimation.rows, currentAnimation.cols, currentAnimation.CurrentStep)
+		//log15.Debug(x0, x1, y0, y1, col, row, currentAnimation.rows, currentAnimation.cols, currentAnimation.CurrentStep)
 
 		r := image.Rect(x0, y0, x1, y1)
 
@@ -768,7 +768,7 @@ func (sprite *Sprite) Step(i int) int {
 		i = 0
 	}
 	currentAnimation.CurrentStep = i
-	//fmt.Println(i, currentAnimation.Steps)
+	//log15.Debug(i, currentAnimation.Steps)
 	return i
 
 }

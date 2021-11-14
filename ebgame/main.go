@@ -6,7 +6,6 @@ import (
 	"image/color"
 	_ "image/png"
 	"io/ioutil"
-	"log"
 	"math"
 	"math/rand"
 	"os"
@@ -22,6 +21,7 @@ import (
 	"github.com/peterSZW/ebdemo/ebgame/resources/images"
 	"github.com/peterSZW/ebdemo/ebgame/sound"
 	uuid "github.com/satori/go.uuid"
+	"github.com/xiaomi-tc/log15"
 	yaml "gopkg.in/yaml.v2"
 )
 
@@ -100,7 +100,7 @@ const chan_name = "game_room_1"
 //初始化
 func init() {
 	//debug.SetGCPercent(-1)
-	fmt.Println("init main")
+	log15.Debug("init main")
 	bulletList = make(map[int64]*Sprite)
 	enemyList = make(map[int64]*Sprite)
 	effctList = make(map[int64]*Sprite)
@@ -112,7 +112,7 @@ func init() {
 	if file_exist(homePath + yamlFile) {
 		readFromYaml(homePath + yamlFile)
 
-		fmt.Println("READ:", gamecfg)
+		log15.Debug("READ:", gamecfg)
 		//读配置
 
 	}
@@ -121,11 +121,11 @@ func init() {
 		if beaver_enable {
 
 			rsp, err := beaverChat.GetClient(gamecfg.Uuid)
-			fmt.Println("GetClient:", rsp)
+			log15.Debug("GetClient:", rsp)
 			if err != nil {
-				log.Println(err)
+				log15.Error("", "err", err)
 				gamecfg.Uuid = ""
-				//fmt.Println(rsp)
+				//log15.Debug(rsp)
 			} else {
 
 				gamecfg.Uuid = rsp.ID
@@ -138,17 +138,17 @@ func init() {
 		if beaver_enable {
 			_, err := beaverChat.CreateChannel(chan_name, "public")
 			if err != nil {
-				log.Println(err)
+				log15.Error("", "err", err)
 
 			}
 
 			rsp, err := beaverChat.CreateClient([]string{chan_name})
-			fmt.Println(rsp)
+			log15.Debug("CreateClient", "rsp", rsp)
 			if err == nil {
 				gamecfg.Uuid = rsp.ID
 				gamecfg.Token = rsp.ID
 			} else {
-				log.Println(err)
+				log15.Error("", "err", err)
 			}
 		}
 
@@ -165,7 +165,7 @@ func init() {
 		writeToYaml(homePath + yamlFile)
 	}
 
-	log.Println(gamecfg)
+	log15.Debug("write", "gamecfg", gamecfg)
 
 	//errstr = gamecfg.Uuid
 
@@ -239,7 +239,9 @@ func init() {
 
 	gv.Life = 100
 
-	go ws_client()
+	if beaver_enable {
+		go ws_client()
+	}
 
 	// client()
 	// login()

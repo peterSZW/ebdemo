@@ -1,9 +1,10 @@
 package ebgame
 
 import (
-	"fmt"
 	"testing"
 	"time"
+
+	"github.com/xiaomi-tc/log15"
 )
 
 func TestXXX(t *testing.T) {
@@ -23,7 +24,7 @@ func TestXXX(t *testing.T) {
 	path.Speed = 50
 
 	for path.LastProgress < path.Totallength {
-		fmt.Println(path.Next(), path.LastProgress)
+		log15.Debug(path.Next(), path.LastProgress)
 		time.Sleep(time.Duration(time.Millisecond * 30))
 
 	}

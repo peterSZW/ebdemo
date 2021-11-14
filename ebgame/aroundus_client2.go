@@ -14,8 +14,6 @@ import (
 	"github.com/peterSZW/ebdemo/ebgame/internal/aroundUsServer/player"
 	uuid "github.com/satori/go.uuid"
 	"github.com/xiaomi-tc/log15"
-
-	"log"
 )
 
 var host *string
@@ -24,25 +22,41 @@ var port *int
 var aroundus_url string
 var aroundus_enable bool
 
-func init() {
-	fmt.Println("init aroundus_url")
+func TryApi(url string) bool {
 
-	//beaver_url = "http://192.168.2.218:7403"
-	beaver_url = "http://127.0.0.1:7403"
-	resp, err := http.Get(beaver_url + "/api")
+	resp, err := http.Get(url + "/api")
 	if err != nil {
-		fmt.Println(err)
-		beaver_url = "http://villa.tpddns.cn:7403"
-		resp, err = http.Get(beaver_url + "/api")
-		if err != nil {
-			fmt.Println(err)
-		} else {
-			fmt.Println(resp.StatusCode)
+		log15.Error("http.Get", "err", err, "url", url)
+
+		return false
+	}
+	log15.Debug("http.Get", "resp", resp.StatusCode, "url", url)
+	return resp.StatusCode == 200
+
+}
+
+var aroundus_ip string
+
+func init() {
+	log15.Debug("init aroundus_url")
+
+	beaver_url = "http://127.0.0.1:7403"
+	aroundus_ip = "127.0.0.1"
+
+	if !TryApi(beaver_url) {
+		beaver_url = "http://192.168.2.218:7403"
+		aroundus_ip = "192.168.2.218"
+
+		if !TryApi(beaver_url) {
+			beaver_url = "http://villa.tpddns.cn:7403"
+			aroundus_ip = "villa.tpddns.cn"
+			if !TryApi(beaver_url) {
+				return
+			}
 		}
 
-		return
 	}
-	fmt.Println(resp.StatusCode)
+
 	aroundus_enable = true
 	if aroundus_enable {
 		gamecfg.Uuid = uuid.NewV4().String()
@@ -52,7 +66,7 @@ func init() {
 
 func getIncomingClientUdp(udpConnection *net.UDPConn) {
 	errx := error(nil)
-	fmt.Println("Client listen....")
+	log15.Debug("Client listen....")
 
 	for errx == nil {
 		buffer := make([]byte, 1024)
@@ -60,32 +74,32 @@ func getIncomingClientUdp(udpConnection *net.UDPConn) {
 		size, _, errx := udpConnection.ReadFromUDP(buffer)
 		//addr
 		if errx != nil {
-			log.Println("Cant read packet!", "err", errx)
+			log15.Error("", "err", "Cant read packet!", "err", errx)
 			time.Sleep(10 * time.Second)
 
 			continue
 		}
-		//log.Println(addr)
+		//log15.Error("","err",addr)
 		data := buffer[:size]
 
 		var dataPacket packet.ServerPacket
 		err2 := json.Unmarshal(data, &dataPacket)
 		if err2 != nil {
 			log15.Error("Unmarshal", "err", err2)
-			//log.Println("Couldn't parse json player data! Skipping iteration!")
+			//log15.Error("","err","Couldn't parse json player data! Skipping iteration!")
 			continue
 		} else {
 			if dataPacket.Data != nil {
 				if dataPacket.Type == packet.PositionBroadcast {
 					//json.mas
-					//fmt.Println(string(data))
+					//log15.Debug(string(data))
 					var dataPacket2 packet.TNewUserReq
 					err2 := json.Unmarshal(data, &dataPacket2)
 					if err2 != nil {
 						log15.Error("Unmarshal", "err", err2)
 					}
 
-					//fmt.Println((dataPacket2))
+					//log15.Debug((dataPacket2))
 
 					robot2.X = float64(dataPacket2.Data.PlayerPosition.X)
 					robot2.Y = float64(dataPacket2.Data.PlayerPosition.Y)
@@ -109,7 +123,7 @@ func UpdatePosNow() {
 
 	_, err := packetToSend.SendUdpStream2(udpConnection)
 	if err != nil {
-		log.Println(err)
+		log15.Error("", "err", err)
 	}
 }
 func loopUpdate() {
@@ -127,7 +141,7 @@ func headtbeat() {
 
 		_, err := packetToSend.SendUdpStream2(udpConnection)
 		if err != nil {
-			log.Println(err)
+			log15.Error("", "err", err)
 		}
 		time.Sleep(time.Duration(10 * time.Second))
 	}
@@ -141,7 +155,7 @@ func Dial() {
 
 	_, err := packetToSend.SendUdpStream2(udpConnection)
 	if err != nil {
-		log.Println(err)
+		log15.Error("", "err", err)
 	}
 }
 
@@ -151,7 +165,7 @@ func NewUser() {
 	reqData.Type = packet.NewUser
 	reqData.Data = &player.Player{Uuid: reqData.Uuid}
 
-	data, _ := req.Post("http://127.0.0.1:7403/api", req.BodyJSON(&reqData))
+	data, _ := req.Post(beaver_url+"/api", req.BodyJSON(&reqData))
 
 	fmt.Print(data, " ")
 }
@@ -171,9 +185,10 @@ func client() {
 	// 	IP:   net.IPv4(192, 168, 2, 218),
 	// 	Port: 7403,
 	// }
+	ipp, _ := net.ResolveIPAddr("ip", aroundus_ip)
 
 	user.UdpAddress = &net.UDPAddr{
-		IP:   net.IPv4(127, 0, 0, 1),
+		IP:   ipp.IP,
 		Port: 7403,
 	}
 
@@ -182,7 +197,7 @@ func client() {
 	udpConnection, err = net.DialUDP("udp", nil, user.UdpAddress)
 
 	if err != nil {
-		fmt.Println(err)
+		log15.Error("", "err", err)
 		time.Sleep(time.Duration(10 * time.Second))
 
 	} else {
@@ -201,18 +216,18 @@ func client() {
 // 		var command, parameter string
 // 		fmt.Scanln(&command, &parameter)
 // 		//commands := strings.Split(strings.Trim(command, "\n\t/\\'\""), " ")
-// 		//fmt.Println(command, "|", commands)
+// 		//log15.Debug(command, "|", commands)
 // 		switch command {
 // 		case "help", "h":
-// 			log.Println("help(h)")
-// 			log.Println("login(lg)")
-// 			log.Println("disconnet(dc) [id]")
+// 			log15.Error("","err","help(h)")
+// 			log15.Error("","err","login(lg)")
+// 			log15.Error("","err","disconnet(dc) [id]")
 // 		case "login", "lg":
 // 			packetToSend := packet.StampPacket(user, packet.DialAddr)
 
 // 			_, err := packetToSend.SendUdpStream2(udpConnection)
 // 			if err != nil {
-// 				log.Println(err)
+// 				log15.Error("","err",err)
 // 			}
 // 		case "init", "it", "1":
 // 			user.Name = "peter"
@@ -222,7 +237,7 @@ func client() {
 
 // 			_, err := packetToSend.SendUdpStream2(udpConnection)
 // 			if err != nil {
-// 				log.Println(err)
+// 				log15.Error("","err",err)
 // 			}
 // 		case "2":
 // 			user.Name = "leo"
@@ -232,7 +247,7 @@ func client() {
 
 // 			_, err := packetToSend.SendUdpStream2(udpConnection)
 // 			if err != nil {
-// 				log.Println(err)
+// 				log15.Error("","err",err)
 // 			}
 // 		case "3":
 // 			user.Name = "alex"
@@ -242,12 +257,12 @@ func client() {
 
 // 			_, err := packetToSend.SendUdpStream2(udpConnection)
 // 			if err != nil {
-// 				log.Println(err)
+// 				log15.Error("","err",err)
 // 			}
 // 		case "disconnet", "dc":
 // 			i, err := strconv.Atoi(parameter)
 // 			if err != nil {
-// 				log.Println(err.Error() + "Cant convert to number position")
+// 				log15.Error("","err",err.Error() + "Cant convert to number position")
 // 			}
 
 // 			user := player.Player{Id: i}
@@ -255,10 +270,10 @@ func client() {
 
 // 			_, err = packetToSend.SendUdpStream2(udpConnection)
 // 			if err != nil {
-// 				log.Println(err)
+// 				log15.Error("","err",err)
 // 			}
 // 		default:
-// 			log.Println("Unknown command")
+// 			log15.Error("","err","Unknown command")
 // 		}
 // 	}
 // }

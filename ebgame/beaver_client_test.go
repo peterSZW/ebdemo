@@ -1,11 +1,12 @@
 package ebgame
 
 import (
-	"fmt"
 	"testing"
+
+	"github.com/xiaomi-tc/log15"
 )
 
 func TestGETUrl(t *testing.T) {
-	fmt.Println(beaver_url)
+	log15.Debug(beaver_url)
 	testmain()
 }

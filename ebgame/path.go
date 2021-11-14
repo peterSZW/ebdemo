@@ -1,9 +1,10 @@
 package ebgame
 
 import (
-	"fmt"
 	"math"
 	"time"
+
+	"github.com/xiaomi-tc/log15"
 )
 
 type Point struct {
@@ -42,7 +43,7 @@ func (p *Path) PlayPath() {
 	lasty := 0.
 	for i := 0; i < len(p.points); i++ {
 		point := p.points[i]
-		//fmt.Println(i, point.x, point.y, lastx, lasty)
+		//log15.Debug(i, point.x, point.y, lastx, lasty)
 		if i >= 1 {
 			l := math.Sqrt(float64((point.x-lastx)*(point.x-lastx) + (point.y-lasty)*(point.y-lasty)))
 
@@ -50,7 +51,7 @@ func (p *Path) PlayPath() {
 
 			p.minpath = append(p.minpath, MinPath{length, length + l, l})
 
-			//fmt.Println("--------------------------", length, length+l, l)
+			//log15.Debug("--------------------------", length, length+l, l)
 			p.Totallength = length + l
 			length = length + l
 		}
@@ -82,12 +83,12 @@ func (p *Path) Next() *Point {
 		p.lastCalc = time.Now()
 		return &p.points[0]
 	}
-	//fmt.Println(int(time.Since(p.lastCalc) / 100000000))
-	//fmt.Println(time.Since(p.lastCalc))
+	//log15.Debug(int(time.Since(p.lastCalc) / 100000000))
+	//log15.Debug(time.Since(p.lastCalc))
 
 	//newProgress := p.Speed * float64(time.Since(p.lastCalc).Microseconds()) / 100000
 	// if p.LastProgress > newProgress {
-	// 	fmt.Println("Errr", p.LastProgress, newProgress)
+	// 	log15.Debug("Errr", p.LastProgress, newProgress)
 	// }
 	// p.LastProgress = newProgress
 
@@ -100,7 +101,7 @@ func (p *Path) Next() *Point {
 	for i := p.LastIndex; i < len(p.minpath); i++ {
 		mp := p.minpath[i]
 
-		//fmt.Println(p.LastProgress)
+		//log15.Debug(p.LastProgress)
 		if (mp.start <= p.LastProgress) && (p.LastProgress <= mp.end) {
 			p.LastIndex = i
 			pencent := (p.LastProgress - mp.start) / mp.length
@@ -111,7 +112,7 @@ func (p *Path) Next() *Point {
 		}
 
 	}
-	fmt.Println("ERROR!!!!!!!!")
+	log15.Debug("ERROR!!!!!!!!")
 	return nil
 
 }

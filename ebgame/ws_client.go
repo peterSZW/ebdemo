@@ -70,7 +70,7 @@ func ws_client() {
 		for {
 			_, message, err := c.ReadMessage()
 			if err != nil {
-				log.Println("read:", err)
+				log15.Error("", "err", "read:", err)
 				return
 			}
 			//log.Printf("recv: %s", message)
@@ -87,20 +87,20 @@ func ws_client() {
 		case <-done:
 			return
 		case t := <-ticker.C:
-			log.Println(t)
+			log15.Error("", "err", t)
 			// err := c.WriteMessage(websocket.TextMessage, []byte(t.String()))
 			// if err != nil {
-			// 	log.Println("write:", err)
+			// 	log15.Error("","err","write:", err)
 			// 	return
 			// }
 		case <-interrupt:
-			log.Println("interrupt")
+			log15.Error("", "err", "interrupt")
 
 			// Cleanly close the connection by sending a close message and then
 			// waiting (with timeout) for the server to close the connection.
 			err := c.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
 			if err != nil {
-				log.Println("write close:", err)
+				log15.Error("", "err", "write close:", err)
 				return
 			}
 			select {

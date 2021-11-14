@@ -2,12 +2,12 @@ package beavergo
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"strconv"
 	"strings"
+
+	"github.com/xiaomi-tc/log15"
 )
 
 type ChatClient struct {
@@ -44,7 +44,7 @@ func (c *ChatClient) command(method string, url string, payload string) ([]byte,
 	}
 
 	if err != nil {
-		log.Print(err)
+		log15.Error("", "err", err)
 		return nil, err
 	}
 	req.Header.Add("Content-Type", "application/json")
@@ -53,7 +53,7 @@ func (c *ChatClient) command(method string, url string, payload string) ([]byte,
 
 	res, err := client.Do(req)
 	if err != nil {
-		log.Print(err)
+		log15.Error("", "err", err)
 		return nil, err
 	}
 	defer res.Body.Close()
@@ -72,7 +72,7 @@ func (c *ChatClient) HealthCheck() (*Status, error) {
 	var status *Status
 	err = json.Unmarshal(body, &status)
 	if err != nil {
-		log.Print(err, string(body), url)
+		log15.Error("", "err", err, string(body), url)
 		return nil, err
 	}
 	return status, nil
@@ -99,11 +99,11 @@ func (c *ChatClient) GetConfig(key string) (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println("[", string(body), "]")
+	log15.Debug("[", string(body), "]")
 	var config *Config
 	err = json.Unmarshal(body, &config)
 	if err != nil {
-		log.Print(err)
+		log15.Error("", "err", err)
 		return nil, err
 	}
 	return config, nil
@@ -145,7 +145,7 @@ func (c *ChatClient) GetChannel(channel string) (*Channel, error) {
 	var chanresp *Channel
 	err = json.Unmarshal(body, &chanresp)
 	if err != nil {
-		log.Print(err)
+		log15.Error("", "err", err)
 		return nil, err
 	}
 	return chanresp, nil
@@ -215,7 +215,7 @@ func (c *ChatClient) DeleteChannel(channel string) (bool, error) {
 		return false, err
 
 	}
-	log.Print(string(body))
+	log15.Error("", "err", string(body))
 	return true, nil
 }
 
@@ -229,11 +229,11 @@ func (c *ChatClient) CreateClient(channel []string) (*ClientResp, error) {
 	if err != nil {
 		return nil, err
 	}
-	log.Println(string(body))
+	log15.Error("", "err", string(body))
 	var clientresp *ClientResp
 	err = json.Unmarshal(body, &clientresp)
 	if err != nil {
-		log.Print(err)
+		log15.Error("", "err", err)
 		return nil, err
 	}
 	return clientresp, nil
@@ -251,7 +251,7 @@ func (c *ChatClient) GetClient(id string) (*ClientResp, error) {
 	var clientresp *ClientResp
 	err = json.Unmarshal(body, &clientresp)
 	if err != nil {
-		log.Print(err)
+		log15.Error("", "err", err)
 		return nil, err
 	}
 	return clientresp, nil

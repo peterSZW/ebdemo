@@ -167,10 +167,10 @@ func init() {
 	if aroundus_enable {
 		gamecfg.Uuid = uuid.NewV4().String()
 	}
-
-	client()
-	NewUser()
-	Dial()
+	aroundus_ip = "127.0.0.1"
+	gs_udp_client()
+	// NewUser()
+	gs_udp_Dial()
 
 	if gamecfg.Uuid != "" {
 		writeToYaml(homePath + yamlFile)

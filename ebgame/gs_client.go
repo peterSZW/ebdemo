@@ -77,6 +77,9 @@ type GsClient struct {
 	URL   string
 }
 
+func init() {
+	gs = NewGSConnect("", "http://127.0.0.1:7403")
+}
 func NewGSConnect(token string, url string) *GsClient {
 
 	client := GsClient{

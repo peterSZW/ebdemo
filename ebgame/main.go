@@ -168,9 +168,8 @@ func init() {
 		gamecfg.Uuid = uuid.NewV4().String()
 	}
 	aroundus_ip = "127.0.0.1"
-	gs_udp_client()
+
 	// NewUser()
-	gs_udp_Dial()
 
 	if gamecfg.Uuid != "" {
 		writeToYaml(homePath + yamlFile)
@@ -188,6 +187,9 @@ func init() {
 
 	rsp2, _ := gs.Joinroom(rsp1.Token, "myroom")
 	log15.Debug("Joinroom", "rsp", rsp2)
+
+	gs_udp_client()
+	gs_udp_Dial()
 
 	//errstr = gamecfg.Uuid
 

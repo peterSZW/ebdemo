@@ -11,6 +11,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strconv"
 	"strings"
 	"time"
 
@@ -72,6 +73,7 @@ func checkError(err error) {
 }
 
 type GameConfig struct {
+	Account   string `yaml:"Account"`
 	Uuid      string `yaml:"Uuid"`
 	Token     string `yaml:"Token"`
 	HighScore int    `yaml:"HighScore"`
@@ -112,11 +114,20 @@ func init() {
 	if file_exist(homePath + yamlFile) {
 		readFromYaml(homePath + yamlFile)
 
-		log15.Debug("READ:", gamecfg)
+		log15.Debug("READ:", "gamecfg", gamecfg)
 		//读配置
 
 	}
 
+	// rsp, _ := gs.Signin("peta", "abc")
+	// fmt.Println(rsp)
+	// rsp, _ = gs.Join("peta", "abc")
+	// fmt.Println(rsp)
+
+	if gamecfg.Account == "" {
+
+		gamecfg.Account = "peter" + strconv.Itoa(rand.Int()%10000)
+	}
 	if gamecfg.Uuid != "" {
 		if beaver_enable {
 

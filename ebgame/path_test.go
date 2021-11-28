@@ -24,7 +24,7 @@ func TestXXX(t *testing.T) {
 	path.Speed = 50
 
 	for path.LastProgress < path.Totallength {
-		log15.Debug(path.Next(), path.LastProgress)
+		log15.Debug("", "last", path.LastProgress)
 		time.Sleep(time.Duration(time.Millisecond * 30))
 
 	}

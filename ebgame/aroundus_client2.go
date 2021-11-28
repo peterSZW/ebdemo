@@ -37,7 +37,7 @@ func TryApi(url string) bool {
 
 var aroundus_ip string
 
-func init() {
+func arus_init() {
 	log15.Debug("init aroundus_url")
 
 	beaver_url = "http://127.0.0.1:7403"

@@ -6,5 +6,5 @@ import (
 
 func TestNet(t *testing.T) {
 	client()
-	login()
+	//login()
 }

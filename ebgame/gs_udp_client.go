@@ -197,7 +197,7 @@ func gs_udp_client() {
 
 	} else {
 
-		gs_udp_Dial()
+		
 		go gs_getIncomingClientUdp(gs_udpConnection)
 		go gs_headtbeat()
 		//ClientConsoleCLI(gs_udpConnection)

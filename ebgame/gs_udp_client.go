@@ -115,9 +115,10 @@ func gs_getIncomingClientUdp(gs_udpConnection *net.UDPConn) {
 func gs_UpdatePosNow() {
 
 	user.Uuid = gamecfg.Uuid
+
 	user.PlayerPosition.X = float32(robot.X)
 	user.PlayerPosition.Y = float32(robot.Y)
-	packetToSend := StampPacket(user.Uuid, user.PlayerPosition, UpdatePos)
+	packetToSend := StampPacket(gamecfg.Token, user.Uuid, user.PlayerPosition, UpdatePos)
 
 	_, err := packetToSend.SendUdpStream2(gs_udpConnection)
 	if err != nil {
@@ -126,7 +127,7 @@ func gs_UpdatePosNow() {
 }
 func gs_loopUpdate() {
 	for {
-		UpdatePosNow()
+		gs_UpdatePosNow()
 		time.Sleep(time.Duration(200 * time.Millisecond))
 	}
 
@@ -135,7 +136,7 @@ func gs_headtbeat() {
 	for {
 		user.Uuid = gamecfg.Uuid
 
-		packetToSend := StampPacket(user.Uuid, nil, HeartBeat)
+		packetToSend := StampPacket(gamecfg.Token, user.Uuid, nil, HeartBeat)
 
 		_, err := packetToSend.SendUdpStream2(gs_udpConnection)
 		if err != nil {
@@ -149,7 +150,7 @@ func gs_udp_Dial() {
 
 	user.Uuid = gamecfg.Uuid
 
-	packetToSend := StampPacket(user.Uuid, user, DialAddr)
+	packetToSend := StampPacket(gamecfg.Token, user.Uuid, user, DialAddr)
 
 	_, err := packetToSend.SendUdpStream2(gs_udpConnection)
 	if err != nil {

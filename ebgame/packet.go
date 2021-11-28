@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net"
+
+	"github.com/xiaomi-tc/log15"
 )
 
 type PlayerPosition struct {
@@ -37,11 +39,11 @@ const (
 	// GL_KilledPlayer                      // TCP
 	// GL_Init                              // TCP
 	// GL_StartGame                         // TCP
-	DialAddr       = iota + 1000 // UDP
-	UpdatePos                    // UDP
-	UpdateRotation               // UDP
-	// PositionBroadcast               // UDP
-	HeartBeat // UDP
+	DialAddr          = iota + 1000 // UDP
+	UpdatePos                       // UDP
+	UpdateRotation                  // UDP
+	PositionBroadcast               // UDP
+	HeartBeat                       // UDP
 )
 
 type TBaseReqPacket struct {
@@ -182,10 +184,11 @@ type ClientPacket struct {
 }
 
 type ServerPacket struct {
-	Type int16       `json:"type"`
-	Seq  int64       `json:"seq"`
-	Uuid string      `json:"uuid"`
-	Data interface{} `json:"data"`
+	Type  int16       `json:"type"`
+	Seq   int64       `json:"seq"`
+	Uuid  string      `json:"uuid"`
+	Token string      `json:"token"`
+	Data  interface{} `json:"data"`
 }
 
 type GameInitData struct {
@@ -207,25 +210,26 @@ func (dataPacket *ClientPacket) DataToBytes() ([]byte, error) {
 
 var seq int64
 
-func StampPacket(uuid string, data interface{}, packetType int16) ServerPacket {
+func StampPacket(token string, uuid string, data interface{}, packetType int16) ServerPacket {
 	seq++
-	return ServerPacket{Uuid: uuid, Type: packetType, Seq: seq, Data: data}
+	return ServerPacket{Token: token, Uuid: uuid, Type: packetType, Seq: seq, Data: data}
 	//ServerPacket{}
 }
 
-func (packet *ServerPacket) SendTcpStream(tcpConnection net.Conn) (int, error) {
-	packetJson, err := json.Marshal(*packet)
-	if err != nil {
-		return 0, fmt.Errorf("error while marshaling TCP packet")
-	}
-	return tcpConnection.Write([]byte(packetJson))
-}
+// func (packet *ServerPacket) SendTcpStream(tcpConnection net.Conn) (int, error) {
+// 	packetJson, err := json.Marshal(*packet)
+// 	if err != nil {
+// 		return 0, fmt.Errorf("error while marshaling TCP packet")
+// 	}
+// 	return tcpConnection.Write([]byte(packetJson))
+// }
 
 func (packet *ServerPacket) SendUdpStream(udpConnection *net.UDPConn, udpAddress *net.UDPAddr) (int, error) {
 	packetJson, err := json.Marshal(*packet)
 	if err != nil {
 		return 0, fmt.Errorf("error while marshaling UDP packet")
 	}
+	log15.Debug("SendUdpStream", "pack", string(packetJson))
 	return udpConnection.WriteToUDP([]byte(packetJson), udpAddress)
 }
 func (packet *ServerPacket) SendUdpStream2(udpConnection *net.UDPConn) (int, error) {
@@ -233,5 +237,6 @@ func (packet *ServerPacket) SendUdpStream2(udpConnection *net.UDPConn) (int, err
 	if err != nil {
 		return 0, fmt.Errorf("error while marshaling UDP packet")
 	}
+	log15.Debug("SendUdpStream2", "pack", string(packetJson))
 	return udpConnection.Write([]byte(packetJson))
 }

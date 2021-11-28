@@ -125,7 +125,7 @@ func init() {
 	// fmt.Println(rsp)
 
 	if gamecfg.Account == "" {
-
+		rand.Seed(time.Now().UnixNano())
 		gamecfg.Account = "peter" + strconv.Itoa(rand.Int()%10000)
 	}
 	if gamecfg.Uuid != "" {
@@ -176,7 +176,18 @@ func init() {
 		writeToYaml(homePath + yamlFile)
 	}
 
-	log15.Debug("write", "gamecfg", gamecfg)
+	log15.Debug("write", "gamecfg", gamecfg, "path", homePath+yamlFile)
+
+	rsp0, _ := gs.Signup(gamecfg.Account, "abc")
+	log15.Debug("singup", "rsp", rsp0)
+
+	rsp1, _ := gs.Signin(gamecfg.Account, "abc")
+	log15.Debug("singin", "rsp", rsp1)
+
+	gamecfg.Token = rsp1.Token
+
+	rsp2, _ := gs.Joinroom(rsp1.Token, "myroom")
+	log15.Debug("Joinroom", "rsp", rsp2)
 
 	//errstr = gamecfg.Uuid
 
@@ -600,6 +611,7 @@ func movePlanAndFireBullet() {
 			UpdatePosNow()
 			//beaverChat.PublishChannel(chan_name, fmt.Sprintf(`{"message":"%f,%f","id":"%s"}`, lastnetxx, lastnetyy, gamecfg.Uuid))
 		}
+		gs_UpdatePosNow()
 
 	}
 

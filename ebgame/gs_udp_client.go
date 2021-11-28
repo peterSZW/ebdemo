@@ -88,19 +88,24 @@ func gs_getIncomingClientUdp(gs_udpConnection *net.UDPConn) {
 			continue
 		} else {
 			if dataPacket.Data != nil {
-				if dataPacket.Type == PositionBroadcast {
+				if dataPacket.Type == PositionBroadcast || dataPacket.Type == UpdatePos {
 					//json.mas
 					//log15.Debug(string(data))
-					var dataPacket2 TPosReq
-					err2 := json.Unmarshal(data, &dataPacket2)
-					if err2 != nil {
-						log15.Error("Unmarshal", "err", err2)
+
+					if dataPacket.Token != gamecfg.Token {
+						var dataPacket2 TUpdatePosReq
+						err2 := json.Unmarshal(data, &dataPacket2)
+						if err2 != nil {
+							log15.Error("Unmarshal", "err", err2)
+						}
+
+						log15.Debug("dataPacket2", "data", dataPacket2)
+
+						robot2.X = float64(dataPacket2.Data.X)
+						robot2.Y = float64(dataPacket2.Data.Y)
+
 					}
 
-					//log15.Debug((dataPacket2))
-
-					robot2.X = float64(dataPacket2.X)
-					robot2.Y = float64(dataPacket2.Y)
 				}
 			}
 

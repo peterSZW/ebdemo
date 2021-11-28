@@ -114,7 +114,7 @@ func init() {
 	if file_exist(homePath + yamlFile) {
 		readFromYaml(homePath + yamlFile)
 
-		log15.Debug("READ:", "gamecfg", gamecfg)
+		log15.Debug("READ:", "gamecfg", gamecfg, "path", homePath+yamlFile)
 		//读配置
 
 	}

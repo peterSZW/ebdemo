@@ -80,6 +80,8 @@ func gs_getIncomingClientUdp(gs_udpConnection *net.UDPConn) {
 		//log15.Error("","err",addr)
 		data := buffer[:size]
 
+		log15.Debug("ReadFromUDP", "data", string(data))
+
 		var dataPacket ServerPacket
 		err2 := json.Unmarshal(data, &dataPacket)
 		if err2 != nil {
@@ -153,13 +155,13 @@ func gs_headtbeat() {
 
 func gs_udp_Dial() {
 
-	user.Uuid = gamecfg.Uuid
+	// user.Uuid = gamecfg.Uuid
 
-	packetToSend := StampPacket(gamecfg.Token, user.Uuid, user, DialAddr)
+	packetToSend := StampPacket(gamecfg.Token, user.Uuid, nil, DialAddr)
 
 	_, err := packetToSend.SendUdpStream2(gs_udpConnection)
 	if err != nil {
-		log15.Error("", "err", err)
+		log15.Error("gs_udp_Dial", "err", err)
 	}
 }
 
@@ -194,6 +196,8 @@ func gs_udp_client() {
 		time.Sleep(time.Duration(10 * time.Second))
 
 	} else {
+
+		gs_udp_Dial()
 		go gs_getIncomingClientUdp(gs_udpConnection)
 		go gs_headtbeat()
 		//ClientConsoleCLI(gs_udpConnection)

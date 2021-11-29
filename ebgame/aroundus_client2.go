@@ -114,7 +114,7 @@ func getIncomingClientUdp(udpConnection *net.UDPConn) {
 
 var user player.Player
 
-func UpdatePosNow() {
+func UpdatePosOldNow() {
 
 	user.Uuid = gamecfg.Uuid
 	user.PlayerPosition.X = float32(robot.X)
@@ -128,7 +128,7 @@ func UpdatePosNow() {
 }
 func loopUpdate() {
 	for {
-		UpdatePosNow()
+		UpdatePosOldNow()
 		time.Sleep(time.Duration(200 * time.Millisecond))
 	}
 

@@ -506,6 +506,29 @@ var lastnetyy float64
 
 var roundx, roundy float64
 
+func addbullet(x, y, degree float64) {
+	lastLaserTime = time.Now()
+
+	newsprite := NewSprite()
+	//newsprite.AddAnimationByte("default", &gfx.EXPLOSION3, 500, 9, ebiten.FilterNearest)
+	newsprite.AddAnimationByteCol("default", &images.RASER1, 200, 4, 6, ebiten.FilterNearest)
+	newsprite.Name = "RASER1"
+	newsprite.Position(x, y)
+	//newsprite.AddEffect(&EffectOptions{Effect: Zoom, Zoom: 3, Duration: 6000, Repeat: false, GoBack: true})
+	//newsprite.CenterCoordonnates = true
+	newsprite.Pause()
+	newsprite.Step(18)
+	newsprite.Speed = 8
+	newsprite.Angle = degree          //+90 GetDegreeByXY(xx, yy)
+	newsprite.Direction = degree + 90 // GetDegreeByXY(xx, yy) + 90
+
+	//newsprite.Start()
+
+	spriteCount++
+
+	bulletList[spriteCount] = newsprite
+}
+
 func movePlanAndFireBullet() {
 	//移动飞机
 	xx, yy, _ := joytouch.GetJoyTouchXY()
@@ -537,6 +560,8 @@ func movePlanAndFireBullet() {
 		if time.Since(lastBulletTime) > time.Duration(100*time.Millisecond) {
 			lastBulletTime = time.Now()
 
+			gs_UpdateFire(robot.X, robot.Y, (degree))
+
 			newsprite := NewSprite()
 			//newsprite.AddAnimationByteCol("default", &images.RASER1, 2000, 4, 6, ebiten.FilterNearest)
 			newsprite.AddAnimationByte("default", &gfx.EXPLOSION2, 500, 7, ebiten.FilterNearest)
@@ -567,6 +592,8 @@ func movePlanAndFireBullet() {
 
 	if btnBullet.GetJoyButton() || ebiten.IsKeyPressed(ebiten.Key1) {
 		if time.Since(lastLaserTime) > time.Duration(50*time.Millisecond) {
+			gs_UpdateFire(robot.X, robot.Y, degree)
+
 			lastLaserTime = time.Now()
 
 			newsprite := NewSprite()
@@ -606,14 +633,15 @@ func movePlanAndFireBullet() {
 
 		lastnetyy = roundy
 
-		if beaver_enable {
-			beaverChat.PublishChannel(chan_name, fmt.Sprintf(`{"message":"%f,%f","id":"%s"}`, lastnetxx, lastnetyy, gamecfg.Uuid))
-		}
-		if aroundus_enable {
-			UpdatePosNow()
-			//beaverChat.PublishChannel(chan_name, fmt.Sprintf(`{"message":"%f,%f","id":"%s"}`, lastnetxx, lastnetyy, gamecfg.Uuid))
-		}
 		gs_UpdatePosNow()
+
+		// if beaver_enable {
+		// 	beaverChat.PublishChannel(chan_name, fmt.Sprintf(`{"message":"%f,%f","id":"%s"}`, lastnetxx, lastnetyy, gamecfg.Uuid))
+		// }
+		// if aroundus_enable {
+		// 	UpdatePosOldNow()
+		// 	//beaverChat.PublishChannel(chan_name, fmt.Sprintf(`{"message":"%f,%f","id":"%s"}`, lastnetxx, lastnetyy, gamecfg.Uuid))
+		// }
 
 	}
 

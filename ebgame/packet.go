@@ -9,9 +9,10 @@ import (
 )
 
 type PlayerPosition struct {
-	X float32 `json:"x"`
-	Y float32 `json:"y"`
-	Z float32 `json:"z"`
+	X      float32 `json:"x"`
+	Y      float32 `json:"y"`
+	Z      float32 `json:"z"`
+	Degree float32 `json:"degree"`
 }
 
 type PlayerRotation struct {
@@ -47,10 +48,11 @@ const (
 )
 
 type TBaseReqPacket struct {
-	Type  int16  `json:"type"`
-	Seq   int64  `json:"seq"`
-	Uuid  string `json:"uuid"`
-	Token string `json:"token"`
+	Type   int16  `json:"type"`
+	TypeEx int16  `json:"typeex"`
+	Seq    int64  `json:"seq"`
+	Uuid   string `json:"uuid"`
+	Token  string `json:"token"`
 }
 
 type TBaseRspPacket struct {
@@ -184,11 +186,12 @@ type ClientPacket struct {
 }
 
 type ServerPacket struct {
-	Type  int16       `json:"type"`
-	Seq   int64       `json:"seq"`
-	Uuid  string      `json:"uuid"`
-	Token string      `json:"token"`
-	Data  interface{} `json:"data"`
+	Type   int16       `json:"type"`
+	TypeEx int16       `json:"typeex"`
+	Seq    int64       `json:"seq"`
+	Uuid   string      `json:"uuid"`
+	Token  string      `json:"token"`
+	Data   interface{} `json:"data"`
 }
 
 type GameInitData struct {

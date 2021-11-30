@@ -186,10 +186,11 @@ func init() {
 	rsp1, _ := gs.Signin(gamecfg.Account, "abc")
 	log15.Debug("singin", "rsp", rsp1)
 
-	gamecfg.Token = rsp1.Token
-
-	rsp2, _ := gs.Joinroom(rsp1.Token, "myroom")
-	log15.Debug("Joinroom", "rsp", rsp2)
+	if rsp1 != nil {
+		gamecfg.Token = rsp1.Token
+		rsp2, _ := gs.Joinroom(rsp1.Token, "myroom")
+		log15.Debug("Joinroom", "rsp", rsp2)
+	}
 
 	gs_udp_client()
 	gs_udp_Dial()

@@ -182,9 +182,9 @@ func gs_headtbeat() {
 
 		_, err := packetToSend.SendUdpStream2(gs_udpConnection)
 		if err != nil {
-			log15.Error("", "err", err)
+			log15.Error("HeartBeat", "err", err)
 		}
-		time.Sleep(time.Duration(10 * time.Second))
+		time.Sleep(time.Duration(5 * time.Second))
 	}
 }
 

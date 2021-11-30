@@ -13,6 +13,7 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -47,7 +48,9 @@ var btnDebug JoyButton
 var btnShowBox JoyButton
 var btnStart JoyButton
 
-var bulletList map[int64]*Sprite
+var bulletList sync.Map
+
+//var bulletList map[int64]*Sprite
 var enemyList map[int64]*Sprite
 var effctList map[int64]*Sprite
 var spriteCount int64
@@ -103,7 +106,7 @@ const chan_name = "game_room_1"
 func init() {
 	//debug.SetGCPercent(-1)
 	log15.Debug("init main")
-	bulletList = make(map[int64]*Sprite)
+	// bulletList = make(map[int64]*Sprite)
 	enemyList = make(map[int64]*Sprite)
 	effctList = make(map[int64]*Sprite)
 
@@ -526,7 +529,8 @@ func addbullet(x, y, degree float64) {
 
 	spriteCount++
 
-	bulletList[spriteCount] = newsprite
+	bulletList.Store(strconv.Itoa(int(spriteCount)), newsprite)
+	//bulletList[spriteCount] = newsprite
 }
 
 func movePlanAndFireBullet() {
@@ -578,7 +582,8 @@ func movePlanAndFireBullet() {
 
 			spriteCount++
 
-			bulletList[spriteCount] = newsprite
+			// bulletList[spriteCount] = newsprite
+			bulletList.Store(strconv.Itoa(int(spriteCount)), newsprite)
 		}
 	}
 
@@ -613,7 +618,8 @@ func movePlanAndFireBullet() {
 
 			spriteCount++
 
-			bulletList[spriteCount] = newsprite
+			// bulletList[spriteCount] = newsprite
+			bulletList.Store(strconv.Itoa(int(spriteCount)), newsprite)
 
 		}
 	}
@@ -680,7 +686,12 @@ func (g *Game) Update() error {
 			gv.Level = 1
 			gv.Life = 100
 			gv.Score = 0
-			bulletList = make(map[int64]*Sprite)
+			//bulletList = make(map[int64]*Sprite)
+
+			bulletList.Range(func(k, v interface{}) bool {
+				bulletList.Delete(k)
+				return true
+			})
 			sound.StopBgm(sound.BgmOutThere)
 			sound.PlayBgm(sound.BgmKindBattle)
 		}
@@ -693,7 +704,11 @@ func (g *Game) Update() error {
 
 		if gv.Life <= 0 {
 			gv.Level = 4
-			bulletList = make(map[int64]*Sprite)
+			//bulletList = make(map[int64]*Sprite)
+			bulletList.Range(func(k, v interface{}) bool {
+				bulletList.Delete(k)
+				return true
+			})
 			sound.StopBgm(sound.BgmKindBattle)
 			sound.PlayBgm(sound.BgmOutThere)
 		}
@@ -707,7 +722,11 @@ func (g *Game) Update() error {
 		GenEnemy_level2()
 		if gv.Life <= 0 {
 			gv.Level = 4
-			bulletList = make(map[int64]*Sprite)
+			//bulletList = make(map[int64]*Sprite)
+			bulletList.Range(func(k, v interface{}) bool {
+				bulletList.Delete(k)
+				return true
+			})
 			sound.StopBgm(sound.BgmKindBattle)
 			sound.PlayBgm(sound.BgmOutThere)
 		}
@@ -722,7 +741,11 @@ func (g *Game) Update() error {
 
 		if gv.Life <= 0 {
 			gv.Level = 4
-			bulletList = make(map[int64]*Sprite)
+			//bulletList = make(map[int64]*Sprite)
+			bulletList.Range(func(k, v interface{}) bool {
+				bulletList.Delete(k)
+				return true
+			})
 			sound.StopBgm(sound.BgmKindBattle)
 			sound.PlayBgm(sound.BgmOutThere)
 		}
@@ -739,7 +762,11 @@ func (g *Game) Update() error {
 		if btnStart.GetClicked() || btnShowBox.GetJoyButton() || ebiten.IsKeyPressed(ebiten.KeyS) {
 			gv.Level = 0
 			robot.Position(float64(screenSize.X/2), float64(screenSize.Y/2)+100)
-			bulletList = make(map[int64]*Sprite)
+			//bulletList = make(map[int64]*Sprite)
+			bulletList.Range(func(k, v interface{}) bool {
+				bulletList.Delete(k)
+				return true
+			})
 			sound.StopBgm(sound.BgmOutThere)
 			sound.PlayBgm(sound.BgmKindBattle)
 
@@ -752,7 +779,10 @@ func (g *Game) Update() error {
 		if btnStart.GetClicked() || btnShowBox.GetJoyButton() || ebiten.IsKeyPressed(ebiten.KeyS) {
 			gv.Level = 0
 			robot.Position(float64(screenSize.X/2), float64(screenSize.Y/2)+100)
-			bulletList = make(map[int64]*Sprite)
+			bulletList.Range(func(k, v interface{}) bool {
+				bulletList.Delete(k)
+				return true
+			})
 			sound.StopBgm(sound.BgmOutThere)
 			sound.PlayBgm(sound.BgmKindBattle)
 
@@ -761,13 +791,23 @@ func (g *Game) Update() error {
 	}
 
 	//删除越界的子弹对象
-	for k, j := range bulletList {
+	// for k, j := range bulletList {
 
-		if OutofScreen(j.X, j.Y, 20) {
-			j.Hide()
-			delete(bulletList, k)
+	// 	if OutofScreen(j.X, j.Y, 20) {
+	// 		j.Hide()
+	// 		delete(bulletList, k)
+	// 	}
+	// }
+
+	bulletList.Range(func(kk, vv interface{}) bool {
+		k := kk.(string)
+		v := vv.(*Sprite)
+		if OutofScreen(v.X, v.Y, 20) {
+			v.Hide()
+			bulletList.Delete(k)
 		}
-	}
+		return true
+	})
 
 	//删除越界的敌人对象
 	for k, j := range enemyList {
@@ -794,8 +834,8 @@ func (g *Game) Update() error {
 	touchStr = touchStr + "\n" + fmt.Sprintf("[%d]", joytouch.tid)
 	touchStr = touchStr + "\n" + fmt.Sprintf("[%f]", robot.Angle)
 
-	touchStr = touchStr + "\n" + fmt.Sprintf("[%v]", len(bulletList))
-	touchStr = touchStr + "\n" + fmt.Sprintf("[%v]", len(enemyList))
+	// touchStr = touchStr + "\n" + fmt.Sprintf("[%v]", len(bulletList))
+	// touchStr = touchStr + "\n" + fmt.Sprintf("[%v]", len(enemyList))
 
 	return nil
 }
@@ -878,13 +918,24 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 	if gv.Level != 4 {
 
-		for _, j := range bulletList {
-			if gv.IsShowCollisionBox {
-				drawCollideBox(screen, j)
-			}
-			j.Draw(screen)
+		// for _, j := range bulletList {
+		// 	if gv.IsShowCollisionBox {
+		// 		drawCollideBox(screen, j)
+		// 	}
+		// 	j.Draw(screen)
 
-		}
+		// }
+
+		bulletList.Range(func(kk, vv interface{}) bool {
+			//k := kk.(string)
+			v := vv.(*Sprite)
+			if gv.IsShowCollisionBox {
+				drawCollideBox(screen, v)
+			}
+			v.Draw(screen)
+			return true
+		})
+
 	}
 
 	for _, j := range enemyList {
@@ -966,10 +1017,13 @@ func checkCollision() {
 
 		}
 
-		for kshot, shot := range bulletList {
+		bulletList.Range(func(ikshot, ishot interface{}) bool {
+			kshot := ikshot.(string)
+			shot := ishot.(Collider)
 
 			if !IsCollideWith(enemy, shot) {
-				continue
+				//continue
+				return true
 			}
 
 			{
@@ -991,10 +1045,15 @@ func checkCollision() {
 
 			gv.Score++
 			delete(enemyList, k)
-			delete(bulletList, kshot)
+			//delete(bulletList, kshot)
+			bulletList.Delete(kshot)
 			sound.PlaySe(sound.SeKindHit2)
+			return true
+		})
 
-		}
+		//for kshot, shot := range bulletList {
+
+		//}
 	}
 
 }

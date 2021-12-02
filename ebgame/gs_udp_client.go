@@ -108,7 +108,7 @@ func gs_getIncomingClientUdp(gs_udpConnection *net.UDPConn) {
 							robot2.Y = float64(dataPacket2.Data.Y)
 						} else {
 							//fire
-							addbullet(float64(dataPacket2.Data.X), float64(dataPacket2.Data.Y), float64(dataPacket2.Data.Degree))
+							gamelogic.addbullet(float64(dataPacket2.Data.X), float64(dataPacket2.Data.Y), float64(dataPacket2.Data.Degree))
 
 						}
 

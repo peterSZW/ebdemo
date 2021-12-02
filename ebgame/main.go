@@ -9,10 +9,8 @@ import (
 	"math"
 	"math/rand"
 	"os"
-	"path/filepath"
 	"runtime"
 	"strconv"
-	"strings"
 	"sync"
 	"time"
 
@@ -63,17 +61,16 @@ type Gloable struct {
 	IsShowText         bool
 }
 
+type GameLogic struct {
+}
+
+var gamelogic GameLogic
+
 var path Path
 
 var gv Gloable
 
 const yamlFile = "/Library/Caches/ebdemo.yaml"
-
-func checkError(err error) {
-	if err != nil {
-		panic(err)
-	}
-}
 
 type GameConfig struct {
 	Account   string `yaml:"Account"`
@@ -84,26 +81,39 @@ type GameConfig struct {
 
 var gamecfg GameConfig
 
-func writeToYaml(src string) {
+func (gcfg *GameConfig) WriteToYaml(src string) {
 	// id := uuid.NewV4()
 	// ids := id.String()
 	// gamecfg.Uuid = ids
-	data, err := yaml.Marshal(gamecfg) // 第二个表示每行的前缀，这里不用，第三个是缩进符号，这里用tab
-	checkError(err)
+	data, err := yaml.Marshal(gcfg) // 第二个表示每行的前缀，这里不用，第三个是缩进符号，这里用tab
+	if err != nil {
+		log15.Error("WriteToYaml", "err", err)
+		return
+	}
 	err = ioutil.WriteFile(src, data, 0777)
-	checkError(err)
+	if err != nil {
+		log15.Error("WriteFile", "err", err)
+	}
 }
-func readFromYaml(src string) {
+func (gcfg *GameConfig) ReadFromYaml(src string) {
 	content, err := ioutil.ReadFile(src)
-	checkError(err)
-	err = yaml.Unmarshal(content, &gamecfg)
-	checkError(err)
+	if err != nil {
+		log15.Error("ReadFile", "err", err)
+		return
+	}
+	err = yaml.Unmarshal(content, &gcfg)
+	if err != nil {
+		log15.Error("Unmarshal", "err", err)
+	}
 }
 
 const chan_name = "game_room_1"
 
 //初始化
 func init() {
+	// 	gl.Init()
+	// }
+	// func (gl *GameLogic) Init() {
 	//debug.SetGCPercent(-1)
 	log15.Debug("init main")
 	// bulletList = make(map[int64]*Sprite)
@@ -115,7 +125,7 @@ func init() {
 	//errstr = ""
 
 	if file_exist(homePath + yamlFile) {
-		readFromYaml(homePath + yamlFile)
+		gamecfg.ReadFromYaml(homePath + yamlFile)
 
 		log15.Debug("READ:", "gamecfg", gamecfg, "path", homePath+yamlFile)
 		//读配置
@@ -175,7 +185,7 @@ func init() {
 	// NewUser()
 
 	if gamecfg.Uuid != "" {
-		writeToYaml(homePath + yamlFile)
+		gamecfg.WriteToYaml(homePath + yamlFile)
 	}
 
 	log15.Debug("write", "gamecfg", gamecfg, "path", homePath+yamlFile)
@@ -277,19 +287,6 @@ func init() {
 
 }
 
-func getCurrentDirectory() string {
-	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
-	if err != nil {
-		return err.Error()
-
-	}
-	return strings.Replace(dir, "\\", "/", -1)
-}
-func file_exist(path string) bool {
-	_, err := os.Lstat(path)
-	return !os.IsNotExist(err)
-}
-
 type Game struct{}
 
 var touchStr string
@@ -298,11 +295,11 @@ var touchStr string
 // 	widthAsDots = 480.
 // )
 
-func OutofScreen(x, y float64, size float64) bool {
+func (gl *GameLogic) OutofScreen(x, y float64, size float64) bool {
 
 	return x > float64(screenSize.X)+size || x < -size || y > float64(screenSize.Y)+size || y < -size
 }
-func limiXY(x, y float64) (float64, float64) {
+func (gl *GameLogic) limiXY(x, y float64) (float64, float64) {
 	if x > float64(screenSize.X)-2.0 {
 		x = float64(screenSize.X) - 2.0
 	}
@@ -320,7 +317,7 @@ func limiXY(x, y float64) (float64, float64) {
 	return x, y
 }
 
-func GetKeyBoard() (xx, yy float64) {
+func (gl *GameLogic) GetKeyBoard() (xx, yy float64) {
 	xx = 0
 	yy = 0
 	if ebiten.IsKeyPressed(ebiten.KeyRight) {
@@ -338,96 +335,10 @@ func GetKeyBoard() (xx, yy float64) {
 	return
 }
 
-func GetDegreeByXY(xx, yy float64) float64 {
-
-	// 45  0  315
-	// 90  0  270
-	// 135 180 225
-
-	if yy == 0 && xx == 0 {
-		return 0
-	}
-	deg := 180 - math.Atan2(yy, xx)/math.Pi*180
-	if deg < 270 {
-		deg = deg + 90
-	} else {
-		deg = deg - 270
-	}
-	return deg
-}
-func GetDirectByXY(xx, yy float64) int {
-	// 7 8 1
-	// 6 0 2
-	// 5 4 3
-	deg := GetDegreeByXY(xx, yy)
-
-	if 22 > deg || deg > 360-22 {
-		return 8
-	}
-	if deg >= 0+22 && deg < 45+22 {
-		return 7
-	}
-	if deg >= 45+22 && deg < 90+22 {
-		return 6
-	}
-	if deg >= 90+22 && deg < 135+22 {
-		return 5
-	}
-
-	if deg >= 135+22 && deg < 180+22 {
-		return 4
-	}
-
-	if deg >= 180+22 && deg < 225+22 {
-		return 3
-	}
-	if deg >= 225+22 && deg < 270+22 {
-		return 2
-	}
-	if deg >= 270+22 && deg < 315+22 {
-		return 1
-	}
-	if deg >= 315+22 && deg < 360+22 {
-		return 8
-	}
-
-	if xx == 0 && yy == 0 {
-		return 0
-	}
-	return 0
-
-	// if xx > 0 && yy < 0 {
-	// 	return 1
-	// }
-	// if xx > 0 && yy == 0 {
-	// 	return 2
-	// }
-	// if xx > 0 && yy > 0 {
-	// 	return 3
-	// }
-	// if xx == 0 && yy > 0 {
-	// 	return 4
-	// }
-	// if xx < 0 && yy > 0 {
-	// 	return 5
-	// }
-
-	// if xx < 0 && yy == 0 {
-	// 	return 6
-	// }
-	// if xx < 0 && yy < 0 {
-	// 	return 7
-	// }
-	// if xx == 0 && yy < 0 {
-	// 	return 8
-	// }
-	// return 0
-}
-
 // var robot2 *Sprite
 var lastGenEnemyTime time.Time
 
-func GenEnemy() {
+func (gl *GameLogic) GenEnemy() {
 
 	if time.Since(lastGenEnemyTime) > time.Duration(70*time.Millisecond) {
 		lastGenEnemyTime = time.Now()
@@ -457,7 +368,7 @@ func GenEnemy() {
 	}
 }
 
-func GenEnemy_level2() {
+func (gl *GameLogic) GenEnemy_level2() {
 
 	if time.Since(lastGenEnemyTime) > time.Duration(210*time.Millisecond) {
 		lastGenEnemyTime = time.Now()
@@ -510,8 +421,33 @@ var lastnetyy float64
 
 var roundx, roundy float64
 
-func addbullet(x, y, degree float64) {
-	lastLaserTime = time.Now()
+func (gl *GameLogic) InitSprite() {
+	joytouch.SetWH(screenSize.X, screenSize.Y)
+	touchpad.X = float64(joytouch.rect.x + joytouch.rect.w/2)
+	touchpad.Y = float64(joytouch.rect.y + joytouch.rect.w/2)
+
+	btnFire.SetWH(screenSize.X, screenSize.Y)
+	btnFire.rect.x = btnFire.rect.x - 35
+	btnBullet.SetWH(screenSize.X, screenSize.Y)
+	btnBullet.rect.x = btnBullet.rect.x + 35
+
+	btnDebug.SetPosition(screenSize.X/2-125, screenSize.Y/2-300, 50, 50)
+	btnShowBox.SetPosition(screenSize.X/2+75, screenSize.Y/2-300, 50, 50)
+
+	btnStart.SetPosition(screenSize.X/2-125, screenSize.Y/2-32, 240, 32)
+
+	robot.Position(float64(screenSize.X/2), float64(screenSize.Y/2)+100)
+
+	gv.IsShowText = false
+	gv.Level = 0
+}
+func (gl *GameLogic) RemoveAllBullet() {
+	bulletList.Range(func(k, v interface{}) bool {
+		bulletList.Delete(k)
+		return true
+	})
+}
+func (gl *GameLogic) addbullet(x, y, degree float64) {
 
 	newsprite := NewSprite()
 	//newsprite.AddAnimationByte("default", &gfx.EXPLOSION3, 500, 9, ebiten.FilterNearest)
@@ -533,315 +469,29 @@ func addbullet(x, y, degree float64) {
 	bulletList.Store(strconv.Itoa(int(spriteCount)), newsprite)
 	//bulletList[spriteCount] = newsprite
 }
+func (gl *GameLogic) addbullet2(x, y, degree float64) {
 
-func movePlanAndFireBullet() {
-	//移动飞机
-	xx, yy, _ := joytouch.GetJoyTouchXY()
+	newsprite := NewSprite()
+	//newsprite.AddAnimationByteCol("default", &images.RASER1, 2000, 4, 6, ebiten.FilterNearest)
+	newsprite.AddAnimationByte("default", &gfx.EXPLOSION2, 500, 7, ebiten.FilterNearest)
+	newsprite.Name = "EXPLOSION2"
+	newsprite.Position(robot.X, robot.Y)
+	newsprite.AddEffect(&EffectOptions{Effect: Zoom, Zoom: 3, Duration: 6000, Repeat: false, GoBack: true})
+	newsprite.CenterCoordonnates = true
 
-	if xx == 0 && yy == 0 {
-		xx, yy = GetKeyBoard()
-	}
-	robot.Pause()
-	if GetDirectByXY(xx, yy) > 0 {
-		robot.Step(GetDirectByXY(xx, yy))
-		degree = GetDegreeByXY(xx, yy)
-	}
+	newsprite.Direction = degree + 90 //GetDegreeByXY(xx, yy) + 90
+	//float64(2-robot.GetStep()) * 45
 
-	robot.X = robot.X + xx
-	robot.Y = robot.Y + yy
-	robot.X, robot.Y = limiXY(robot.X, robot.Y)
+	newsprite.Speed = 5
+	newsprite.Start()
 
-	if ebiten.IsKeyPressed(ebiten.KeyQ) {
-		robot.Angle = robot.Angle + 10
-	}
+	spriteCount++
 
-	if ebiten.IsKeyPressed(ebiten.KeyW) {
-		robot.Angle = robot.Angle - 10
-	}
-
-	//生成子弹
-	if btnFire.GetJoyButton() || ebiten.IsKeyPressed(ebiten.KeySpace) {
-
-		if time.Since(lastBulletTime) > time.Duration(100*time.Millisecond) {
-			lastBulletTime = time.Now()
-
-			gs_UpdateFire(robot.X, robot.Y, (degree))
-
-			newsprite := NewSprite()
-			//newsprite.AddAnimationByteCol("default", &images.RASER1, 2000, 4, 6, ebiten.FilterNearest)
-			newsprite.AddAnimationByte("default", &gfx.EXPLOSION2, 500, 7, ebiten.FilterNearest)
-			newsprite.Name = "EXPLOSION2"
-			newsprite.Position(robot.X, robot.Y)
-			newsprite.AddEffect(&EffectOptions{Effect: Zoom, Zoom: 3, Duration: 6000, Repeat: false, GoBack: true})
-			newsprite.CenterCoordonnates = true
-
-			newsprite.Direction = degree + 90 //GetDegreeByXY(xx, yy) + 90
-			//float64(2-robot.GetStep()) * 45
-
-			newsprite.Speed = 5
-			newsprite.Start()
-
-			spriteCount++
-
-			// bulletList[spriteCount] = newsprite
-			bulletList.Store(strconv.Itoa(int(spriteCount)), newsprite)
-		}
-	}
-
-	if btnDebug.GetJoyButton() || ebiten.IsKeyPressed(ebiten.KeyT) {
-		gv.IsShowText = !gv.IsShowText
-	}
-
-	if btnShowBox.GetClicked() || ebiten.IsKeyPressed(ebiten.KeyC) {
-		gv.IsShowCollisionBox = !gv.IsShowCollisionBox
-	}
-
-	if btnBullet.GetJoyButton() || ebiten.IsKeyPressed(ebiten.Key1) {
-		if time.Since(lastLaserTime) > time.Duration(50*time.Millisecond) {
-			gs_UpdateFire(robot.X, robot.Y, degree)
-
-			lastLaserTime = time.Now()
-
-			newsprite := NewSprite()
-			//newsprite.AddAnimationByte("default", &gfx.EXPLOSION3, 500, 9, ebiten.FilterNearest)
-			newsprite.AddAnimationByteCol("default", &images.RASER1, 200, 4, 6, ebiten.FilterNearest)
-			newsprite.Name = "RASER1"
-			newsprite.Position(robot.X, robot.Y)
-			//newsprite.AddEffect(&EffectOptions{Effect: Zoom, Zoom: 3, Duration: 6000, Repeat: false, GoBack: true})
-			//newsprite.CenterCoordonnates = true
-			newsprite.Pause()
-			newsprite.Step(18)
-			newsprite.Speed = 8
-			newsprite.Angle = degree          //+90 GetDegreeByXY(xx, yy)
-			newsprite.Direction = degree + 90 // GetDegreeByXY(xx, yy) + 90
-
-			//newsprite.Start()
-
-			spriteCount++
-
-			// bulletList[spriteCount] = newsprite
-			bulletList.Store(strconv.Itoa(int(spriteCount)), newsprite)
-
-		}
-	}
-	touchpad.Angle = degree
-	if joytouch.x != 0 && joytouch.y != 0 {
-		touchpad.X = float64(joytouch.x)
-		touchpad.Y = float64(joytouch.y)
-	}
-	touchStr = touchStr + "\n" + fmt.Sprintf("PAD:[%f,%f] DEG:[%f]", xx, yy, GetDegreeByXY(xx, yy))
-
-	//sent to network
-	roundx = math.Round(robot.X)
-	roundy = math.Round(robot.Y)
-
-	if roundx != lastnetxx || roundy != lastnetyy {
-		lastnetxx = roundx
-
-		lastnetyy = roundy
-
-		gs_UpdatePosNow()
-
-		// if beaver_enable {
-		// 	beaverChat.PublishChannel(chan_name, fmt.Sprintf(`{"message":"%f,%f","id":"%s"}`, lastnetxx, lastnetyy, gamecfg.Uuid))
-		// }
-		// if aroundus_enable {
-		// 	UpdatePosOldNow()
-		// 	//beaverChat.PublishChannel(chan_name, fmt.Sprintf(`{"message":"%f,%f","id":"%s"}`, lastnetxx, lastnetyy, gamecfg.Uuid))
-		// }
-
-	}
-
+	// bulletList[spriteCount] = newsprite
+	bulletList.Store(strconv.Itoa(int(spriteCount)), newsprite)
 }
 
-func (g *Game) Update() error {
-	//第一次设置
-	if isFirstUpdate {
-		joytouch.SetWH(screenSize.X, screenSize.Y)
-		touchpad.X = float64(joytouch.rect.x + joytouch.rect.w/2)
-		touchpad.Y = float64(joytouch.rect.y + joytouch.rect.w/2)
-
-		btnFire.SetWH(screenSize.X, screenSize.Y)
-		btnFire.rect.x = btnFire.rect.x - 35
-		btnBullet.SetWH(screenSize.X, screenSize.Y)
-		btnBullet.rect.x = btnBullet.rect.x + 35
-
-		btnDebug.SetPosition(screenSize.X/2-125, screenSize.Y/2-300, 50, 50)
-		btnShowBox.SetPosition(screenSize.X/2+75, screenSize.Y/2-300, 50, 50)
-
-		btnStart.SetPosition(screenSize.X/2-125, screenSize.Y/2-32, 240, 32)
-
-		robot.Position(float64(screenSize.X/2), float64(screenSize.Y/2)+100)
-
-		isFirstUpdate = false
-		gv.IsShowText = false
-		gv.Level = 0
-	}
-
-	movePlanAndFireBullet()
-
-	if gv.Level == 0 { //clickstart
-
-		robot.Show()
-		if btnStart.GetClicked() || btnShowBox.GetJoyButton() || ebiten.IsKeyPressed(ebiten.KeyS) {
-			gv.Level = 1
-			gv.Life = 100
-			gv.Score = 0
-			//bulletList = make(map[int64]*Sprite)
-
-			bulletList.Range(func(k, v interface{}) bool {
-				bulletList.Delete(k)
-				return true
-			})
-			sound.StopBgm(sound.BgmOutThere)
-			sound.PlayBgm(sound.BgmKindBattle)
-		}
-
-	}
-	if gv.Level == 1 { //level 1
-		GenEnemy()
-
-		//paint.DrawText(screen, "攻撃", screenSize.X/2, screenSize.Y/2, color.White, paint.FontSizeXLarge)
-
-		if gv.Life <= 0 {
-			gv.Level = 4
-			//bulletList = make(map[int64]*Sprite)
-			bulletList.Range(func(k, v interface{}) bool {
-				bulletList.Delete(k)
-				return true
-			})
-			sound.StopBgm(sound.BgmKindBattle)
-			sound.PlayBgm(sound.BgmOutThere)
-		}
-
-		if gv.Score > 200 {
-			gv.Level = 2
-		}
-
-	}
-	if gv.Level == 2 { //level 2
-		GenEnemy_level2()
-		if gv.Life <= 0 {
-			gv.Level = 4
-			//bulletList = make(map[int64]*Sprite)
-			bulletList.Range(func(k, v interface{}) bool {
-				bulletList.Delete(k)
-				return true
-			})
-			sound.StopBgm(sound.BgmKindBattle)
-			sound.PlayBgm(sound.BgmOutThere)
-		}
-		if gv.Score > 300 {
-			gv.Level = 5
-		}
-
-	}
-
-	if gv.Level == 3 {
-		GenEnemy_level2()
-
-		if gv.Life <= 0 {
-			gv.Level = 4
-			//bulletList = make(map[int64]*Sprite)
-			bulletList.Range(func(k, v interface{}) bool {
-				bulletList.Delete(k)
-				return true
-			})
-			sound.StopBgm(sound.BgmKindBattle)
-			sound.PlayBgm(sound.BgmOutThere)
-		}
-
-		if gv.Score > 300 {
-			gv.Level = 5
-		}
-
-	}
-
-	if gv.Level == 4 { //youlost
-		robot.Hide()
-
-		if btnStart.GetClicked() || btnShowBox.GetJoyButton() || ebiten.IsKeyPressed(ebiten.KeyS) {
-			gv.Level = 0
-			robot.Position(float64(screenSize.X/2), float64(screenSize.Y/2)+100)
-			//bulletList = make(map[int64]*Sprite)
-			bulletList.Range(func(k, v interface{}) bool {
-				bulletList.Delete(k)
-				return true
-			})
-			sound.StopBgm(sound.BgmOutThere)
-			sound.PlayBgm(sound.BgmKindBattle)
-
-		}
-
-	}
-
-	if gv.Level == 5 { //youwin
-
-		if btnStart.GetClicked() || btnShowBox.GetJoyButton() || ebiten.IsKeyPressed(ebiten.KeyS) {
-			gv.Level = 0
-			robot.Position(float64(screenSize.X/2), float64(screenSize.Y/2)+100)
-			bulletList.Range(func(k, v interface{}) bool {
-				bulletList.Delete(k)
-				return true
-			})
-			sound.StopBgm(sound.BgmOutThere)
-			sound.PlayBgm(sound.BgmKindBattle)
-
-		}
-
-	}
-
-	//删除越界的子弹对象
-	// for k, j := range bulletList {
-
-	// 	if OutofScreen(j.X, j.Y, 20) {
-	// 		j.Hide()
-	// 		delete(bulletList, k)
-	// 	}
-	// }
-
-	bulletList.Range(func(kk, vv interface{}) bool {
-		k := kk.(string)
-		v := vv.(*Sprite)
-		if OutofScreen(v.X, v.Y, 20) {
-			v.Hide()
-			bulletList.Delete(k)
-		}
-		return true
-	})
-
-	//删除越界的敌人对象
-	for k, j := range enemyList {
-
-		if OutofScreen(j.X, j.Y, 20) {
-			j.Hide()
-			delete(enemyList, k)
-		}
-	}
-
-	//检查碰撞
-	checkCollision()
-
-	//计算路径
-	p := path.Next()
-	robotpath.Position(p.x, p.y)
-
-	if path.LastProgress == path.Totallength {
-		path.Reset()
-	}
-
-	//生成字符串
-	touchStr = touchStr + "\n" + fmt.Sprintf("[%d,%d]", joytouch.x, joytouch.y)
-	touchStr = touchStr + "\n" + fmt.Sprintf("[%d]", joytouch.tid)
-	touchStr = touchStr + "\n" + fmt.Sprintf("[%f]", robot.Angle)
-
-	// touchStr = touchStr + "\n" + fmt.Sprintf("[%v]", len(bulletList))
-	// touchStr = touchStr + "\n" + fmt.Sprintf("[%v]", len(enemyList))
-
-	return nil
-}
-
-func drawCollideBox(screen *ebiten.Image, sp *Sprite) {
+func (gl *GameLogic) drawCollideBox(screen *ebiten.Image, sp *Sprite) {
 	cb := sp.GetCollisionBox()
 	for _, b := range cb {
 		x := b.x + sp.X - sp.GetWidth()/2
@@ -859,117 +509,8 @@ func drawCollideBox(screen *ebiten.Image, sp *Sprite) {
 	}
 }
 
-func (g *Game) Draw(screen *ebiten.Image) {
-	//打印 hello world 加帧数
-
-	if gv.Level == 1 {
-
-		//paint.DrawText(screen, "Attack !", screenSize.X/2-100, screenSize.Y/2, color.White, paint.FontSizeXLarge)
-
-	}
-
-	if gv.Level == 0 {
-
-		paint.DrawText(screen, "Click Fire to Start", screenSize.X/2-125, screenSize.Y/2, color.White, paint.FontSizeXLarge)
-
-	}
-	if gv.Level == 4 {
-
-		paint.DrawText(screen, "YOU LOST！", screenSize.X/2-75, screenSize.Y/2, color.White, paint.FontSizeXLarge)
-
-	}
-
-	if gv.Level == 5 {
-
-		paint.DrawText(screen, "YOU WIN！", screenSize.X/2-75, screenSize.Y/2, color.White, paint.FontSizeXLarge)
-
-	}
-	if gv.IsShowText {
-
-		mx, my := ebiten.CursorPosition()
-
-		s := fmt.Sprintf("\n\n\n%s\nFPS : %f %d %d\n%v\n%s\n%s\n%s",
-			homePath, ebiten.CurrentFPS(), mx, my,
-			file_exist(homePath+yamlFile), gamecfg.Uuid, runtime.GOOS, touchStr)
-
-		//curPath,
-		ebitenutil.DebugPrint(screen, s)
-	}
-
-	paint.DrawText(screen, fmt.Sprintf("Life: %d Score: %d", gv.Life, gv.Score), screenSize.X/2-125, 100, color.Gray{0x99}, paint.FontSizeXLarge)
-
-	//ebitenutil.DebugPrintAt(screen, , screenSize.X-200, 100)
-
-	joytouch.DrawBorders(screen, color.Gray16{0x1111})
-	//touchpad.Draw(screen)
-
-	btnFire.DrawBorders(screen, color.Gray16{0x1111})
-	btnBullet.DrawBorders(screen, color.Gray16{0x1111})
-	btnDebug.DrawBorders(screen, color.Gray16{0x1111})
-	btnShowBox.DrawBorders(screen, color.Gray16{0x1111})
-	//btnStart.DrawBorders(screen, color.Gray16{0x1111})
-
-	if gv.IsShowCollisionBox {
-		drawCollideBox(screen, robot)
-	}
-
-	robotpath.Draw(screen)
-	robot.Draw(screen)
-	robot2.Draw(screen)
-
-	if gv.Level != 4 {
-
-		// for _, j := range bulletList {
-		// 	if gv.IsShowCollisionBox {
-		// 		drawCollideBox(screen, j)
-		// 	}
-		// 	j.Draw(screen)
-
-		// }
-
-		bulletList.Range(func(kk, vv interface{}) bool {
-			//k := kk.(string)
-			v := vv.(*Sprite)
-			if gv.IsShowCollisionBox {
-				drawCollideBox(screen, v)
-			}
-			v.Draw(screen)
-			return true
-		})
-
-	}
-
-	for _, j := range enemyList {
-		if gv.IsShowCollisionBox {
-			drawCollideBox(screen, j)
-		}
-		j.Draw(screen)
-
-	}
-
-	for k, j := range effctList {
-		j.Draw(screen)
-		if j.GetStep() >= j.GetTotalStep()-1 {
-			delete(effctList, k)
-		}
-	}
-
-}
-
-func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
-
-	return screenSize.X, screenSize.Y
-}
-func (g *Game) SetWindowSize(width, height int) {
-	// screenSize.X = int(widthAsDots)
-	// screenSize.Y = int(widthAsDots / float64(width) * float64(height))
-	screenSize.X = width
-	screenSize.Y = height
-
-}
-
 //
-func checkCollision() {
+func (gl *GameLogic) checkCollision() {
 
 	for k, enemy := range enemyList {
 
@@ -1056,5 +597,308 @@ func checkCollision() {
 
 		//}
 	}
+
+}
+
+func (gl *GameLogic) FireBullet() {
+
+	//生成子弹
+	if btnFire.GetJoyButton() || ebiten.IsKeyPressed(ebiten.KeySpace) {
+		if time.Since(lastBulletTime) > time.Duration(100*time.Millisecond) {
+			lastBulletTime = time.Now()
+			gs_UpdateFire(robot.X, robot.Y, (degree))
+			gamelogic.addbullet2(robot.X, robot.Y, degree)
+
+		}
+	}
+
+	if btnBullet.GetJoyButton() || ebiten.IsKeyPressed(ebiten.Key1) {
+		if time.Since(lastLaserTime) > time.Duration(50*time.Millisecond) {
+			lastLaserTime = time.Now()
+			gs_UpdateFire(robot.X, robot.Y, degree)
+			gamelogic.addbullet(robot.X, robot.Y, degree)
+		}
+	}
+	touchpad.Angle = degree
+	if joytouch.x != 0 && joytouch.y != 0 {
+		touchpad.X = float64(joytouch.x)
+		touchpad.Y = float64(joytouch.y)
+	}
+
+	//sent to network
+
+}
+
+func (gl *GameLogic) ShowHideDebug() {
+	if btnDebug.GetJoyButton() || ebiten.IsKeyPressed(ebiten.KeyT) {
+		gv.IsShowText = !gv.IsShowText
+	}
+
+	if btnShowBox.GetClicked() || ebiten.IsKeyPressed(ebiten.KeyC) {
+		gv.IsShowCollisionBox = !gv.IsShowCollisionBox
+	}
+}
+func (gl *GameLogic) movePlan() {
+	//移动飞机
+	xx, yy, _ := joytouch.GetJoyTouchXY()
+
+	if xx == 0 && yy == 0 {
+		xx, yy = gamelogic.GetKeyBoard()
+	}
+	robot.Pause()
+	if GetDirectByXY(xx, yy) > 0 {
+		robot.Step(GetDirectByXY(xx, yy))
+		degree = GetDegreeByXY(xx, yy)
+	}
+
+	robot.X = robot.X + xx
+	robot.Y = robot.Y + yy
+	robot.X, robot.Y = gamelogic.limiXY(robot.X, robot.Y)
+
+	if ebiten.IsKeyPressed(ebiten.KeyQ) {
+		robot.Angle = robot.Angle + 10
+	}
+
+	if ebiten.IsKeyPressed(ebiten.KeyW) {
+		robot.Angle = robot.Angle - 10
+	}
+
+	roundx = math.Round(robot.X)
+	roundy = math.Round(robot.Y)
+
+	if roundx != lastnetxx || roundy != lastnetyy {
+		lastnetxx = roundx
+		lastnetyy = roundy
+		gs_UpdatePosNow()
+
+		// if beaver_enable {
+		// 	beaverChat.PublishChannel(chan_name, fmt.Sprintf(`{"message":"%f,%f","id":"%s"}`, lastnetxx, lastnetyy, gamecfg.Uuid))
+		// }
+	}
+	touchStr = touchStr + "\n" + fmt.Sprintf("PAD:[%f,%f] DEG:[%f]", xx, yy, GetDegreeByXY(xx, yy))
+
+}
+
+func (g *Game) Update() error {
+	//第一次设置
+	if isFirstUpdate {
+		isFirstUpdate = false
+		gamelogic.InitSprite()
+	}
+
+	gamelogic.movePlan()
+	gamelogic.FireBullet()
+	gamelogic.ShowHideDebug()
+
+	if gv.Level == 0 { //clickstart
+
+		robot.Show()
+		if btnStart.GetClicked() || btnShowBox.GetJoyButton() || ebiten.IsKeyPressed(ebiten.KeyS) {
+			gv.Level = 1
+			gv.Life = 100
+			gv.Score = 0
+
+			gamelogic.RemoveAllBullet()
+			sound.StopBgm(sound.BgmOutThere)
+			sound.PlayBgm(sound.BgmKindBattle)
+		}
+
+	}
+	if gv.Level == 1 { //level 1
+		gamelogic.GenEnemy()
+
+		if gv.Life <= 0 {
+			gv.Level = 4
+
+			gamelogic.RemoveAllBullet()
+			sound.StopBgm(sound.BgmKindBattle)
+			sound.PlayBgm(sound.BgmOutThere)
+		}
+
+		if gv.Score > 200 {
+			gv.Level = 2
+		}
+
+	}
+	if gv.Level == 2 { //level 2
+		gamelogic.GenEnemy_level2()
+		if gv.Life <= 0 {
+			gv.Level = 4
+			gamelogic.RemoveAllBullet()
+			sound.StopBgm(sound.BgmKindBattle)
+			sound.PlayBgm(sound.BgmOutThere)
+		}
+		if gv.Score > 300 {
+			gv.Level = 5
+		}
+	}
+
+	if gv.Level == 3 {
+		gamelogic.GenEnemy_level2()
+
+		if gv.Life <= 0 {
+			gv.Level = 4
+			gamelogic.RemoveAllBullet()
+			sound.StopBgm(sound.BgmKindBattle)
+			sound.PlayBgm(sound.BgmOutThere)
+		}
+
+		if gv.Score > 300 {
+			gv.Level = 5
+		}
+
+	}
+
+	if gv.Level == 4 { //youlost
+		robot.Hide()
+
+		if btnStart.GetClicked() || btnShowBox.GetJoyButton() || ebiten.IsKeyPressed(ebiten.KeyS) {
+			gv.Level = 0
+			robot.Position(float64(screenSize.X/2), float64(screenSize.Y/2)+100)
+			gamelogic.RemoveAllBullet()
+			sound.StopBgm(sound.BgmOutThere)
+			sound.PlayBgm(sound.BgmKindBattle)
+
+		}
+
+	}
+
+	if gv.Level == 5 { //youwin
+
+		if btnStart.GetClicked() || btnShowBox.GetJoyButton() || ebiten.IsKeyPressed(ebiten.KeyS) {
+			gv.Level = 0
+			robot.Position(float64(screenSize.X/2), float64(screenSize.Y/2)+100)
+			bulletList.Range(func(k, v interface{}) bool {
+				bulletList.Delete(k)
+				return true
+			})
+			sound.StopBgm(sound.BgmOutThere)
+			sound.PlayBgm(sound.BgmKindBattle)
+
+		}
+
+	}
+
+	//删除越界的子弹对象
+
+	bulletList.Range(func(kk, vv interface{}) bool {
+		k := kk.(string)
+		v := vv.(*Sprite)
+		if gamelogic.OutofScreen(v.X, v.Y, 20) {
+			v.Hide()
+			bulletList.Delete(k)
+		}
+		return true
+	})
+
+	//删除越界的敌人对象
+	for k, j := range enemyList {
+
+		if gamelogic.OutofScreen(j.X, j.Y, 20) {
+			j.Hide()
+			delete(enemyList, k)
+		}
+	}
+
+	//检查碰撞
+	gamelogic.checkCollision()
+
+	//计算路径
+	p := path.Next()
+	robotpath.Position(p.x, p.y)
+
+	if path.LastProgress == path.Totallength {
+		path.Reset()
+	}
+
+	//生成字符串
+	touchStr = touchStr + "\n" + fmt.Sprintf("[%d,%d]", joytouch.x, joytouch.y)
+	touchStr = touchStr + "\n" + fmt.Sprintf("[%d]", joytouch.tid)
+	touchStr = touchStr + "\n" + fmt.Sprintf("[%f]", robot.Angle)
+
+	// touchStr = touchStr + "\n" + fmt.Sprintf("[%v]", len(bulletList))
+	// touchStr = touchStr + "\n" + fmt.Sprintf("[%v]", len(enemyList))
+
+	return nil
+}
+
+func (g *Game) Draw(screen *ebiten.Image) {
+	//打印 hello world 加帧数
+
+	if gv.Level == 0 {
+		paint.DrawText(screen, "Click Fire to Start", screenSize.X/2-125, screenSize.Y/2, color.White, paint.FontSizeXLarge)
+	}
+	if gv.Level == 4 {
+		paint.DrawText(screen, "YOU LOST！", screenSize.X/2-75, screenSize.Y/2, color.White, paint.FontSizeXLarge)
+	}
+
+	if gv.Level == 5 {
+		paint.DrawText(screen, "YOU WIN！", screenSize.X/2-75, screenSize.Y/2, color.White, paint.FontSizeXLarge)
+	}
+	if gv.IsShowText {
+		mx, my := ebiten.CursorPosition()
+		s := fmt.Sprintf("\n\n\n%s\nFPS : %f %d %d\n%v\n%s\n%s\n%s",
+			homePath, ebiten.CurrentFPS(), mx, my,
+			file_exist(homePath+yamlFile), gamecfg.Uuid, runtime.GOOS, touchStr)
+		ebitenutil.DebugPrint(screen, s)
+	}
+
+	paint.DrawText(screen, fmt.Sprintf("Life: %d Score: %d", gv.Life, gv.Score), screenSize.X/2-125, 100, color.Gray{0x99}, paint.FontSizeXLarge)
+
+	//ebitenutil.DebugPrintAt(screen, , screenSize.X-200, 100)
+
+	joytouch.DrawBorders(screen, color.Gray16{0x1111})
+	touchpad.Draw(screen)
+
+	btnFire.DrawBorders(screen, color.Gray16{0x1111})
+	btnBullet.DrawBorders(screen, color.Gray16{0x1111})
+	btnDebug.DrawBorders(screen, color.Gray16{0x1111})
+	btnShowBox.DrawBorders(screen, color.Gray16{0x1111})
+
+	if gv.IsShowCollisionBox {
+		gamelogic.drawCollideBox(screen, robot)
+	}
+
+	robotpath.Draw(screen)
+	robot.Draw(screen)
+	robot2.Draw(screen)
+
+	bulletList.Range(func(kk, vv interface{}) bool {
+
+		v := vv.(*Sprite)
+		if gv.IsShowCollisionBox {
+			gamelogic.drawCollideBox(screen, v)
+		}
+		v.Draw(screen)
+		return true
+	})
+
+	for _, j := range enemyList {
+		if gv.IsShowCollisionBox {
+			gamelogic.drawCollideBox(screen, j)
+		}
+		j.Draw(screen)
+
+	}
+
+	//画爆炸
+	for k, j := range effctList {
+		j.Draw(screen)
+		if j.GetStep() >= j.GetTotalStep()-1 {
+			delete(effctList, k)
+		}
+	}
+
+}
+
+func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
+
+	return screenSize.X, screenSize.Y
+}
+func (g *Game) SetWindowSize(width, height int) {
+	// screenSize.X = int(widthAsDots)
+	// screenSize.Y = int(widthAsDots / float64(width) * float64(height))
+	screenSize.X = width
+	screenSize.Y = height
 
 }

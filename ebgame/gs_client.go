@@ -2,6 +2,7 @@ package ebgame
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -78,7 +79,8 @@ type GsClient struct {
 }
 
 func init() {
-	gs = NewGSConnect("", "http://127.0.0.1:7403")
+	url := fmt.Sprintf("http://%s:7403", gameserver_ip)
+	gs = NewGSConnect("", url)
 }
 func NewGSConnect(token string, url string) *GsClient {
 

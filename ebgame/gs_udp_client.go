@@ -38,8 +38,8 @@ var gameserver_ip string
 func gs_init() {
 	log15.Debug("init gameserver_url")
 
-	beaver_url = "http://127.0.0.1:7403"
-	gameserver_ip = "127.0.0.1"
+	beaver_url = "http://192.168.2.250:7403"
+	gameserver_ip = "192.168.2.250"
 
 	if !TryApi(beaver_url) {
 		beaver_url = "http://192.168.2.218:7403"

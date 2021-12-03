@@ -184,7 +184,7 @@ func init() {
 	if aroundus_enable {
 		gamecfg.Uuid = uuid.NewV4().String()
 	}
-	aroundus_ip = "127.0.0.1"
+	aroundus_ip = "192.168.2.250"
 
 	// NewUser()
 

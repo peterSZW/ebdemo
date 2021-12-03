@@ -43,7 +43,7 @@ func gs_init() {
 
 	if !TryApi(beaver_url) {
 		beaver_url = "http://192.168.2.218:7403"
-		gameserver_ip = "192.168.2.218"
+		gameserver_ip = "192.168.2.250"
 
 		if !TryApi(beaver_url) {
 			beaver_url = "http://villa.tpddns.cn:7403"
@@ -246,6 +246,7 @@ func gs_udp_client() {
 	// 	IP:   net.IPv4(192, 168, 2, 218),
 	// 	Port: 7403,
 	// }
+	gameserver_ip = "192.168.2.250"
 	ipp, _ := net.ResolveIPAddr("ip", gameserver_ip)
 
 	user.UdpAddress = &net.UDPAddr{

@@ -193,7 +193,8 @@ func init() {
 	}
 
 	log15.Debug("write", "gamecfg", gamecfg, "path", homePath+yamlFile)
-
+	gameserver_ip = "192.168.2.250"
+	gs.URL = fmt.Sprintf("http://%s:7403", gameserver_ip)
 	rsp0, _ := gs.Signup(gamecfg.Account, "abc")
 	log15.Debug("singup", "rsp", rsp0)
 

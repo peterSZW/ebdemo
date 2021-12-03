@@ -102,6 +102,7 @@ func (c *GsClient) command(method string, url string, payload string) ([]byte, e
 	var req *http.Request
 	var err error
 	fullurl := c.URL + url
+	log15.Debug("command", "url", fullurl)
 
 	if payload == "" {
 		req, err = http.NewRequest(method, fullurl, nil)

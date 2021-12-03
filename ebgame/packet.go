@@ -9,10 +9,18 @@ import (
 )
 
 type PlayerPosition struct {
-	X      float32 `json:"x"`
-	Y      float32 `json:"y"`
-	Z      float32 `json:"z"`
-	Degree float32 `json:"degree"`
+	X float32 `json:"x"`
+	Y float32 `json:"y"`
+	Z float32 `json:"z"`
+}
+
+type UdpBrocastData struct {
+	X          float32 `json:"x,omitempty"`
+	Y          float32 `json:"y,omitempty"`
+	Z          float32 `json:"z,omitempty"`
+	Step       int     `json:"step,omitempty"`
+	Degree     int     `json:"degree,omitempty"`
+	GameStatus int     `json:"game_status,omitempty"`
 }
 
 type PlayerRotation struct {
@@ -149,7 +157,7 @@ type TDialAddrRsp struct {
 
 type TUpdatePosReq struct {
 	TBaseReqPacket
-	Data PlayerPosition `json:"data"`
+	Data UdpBrocastData `json:"data"`
 }
 type TUpdatePosRsp struct {
 	TBaseRspPacket

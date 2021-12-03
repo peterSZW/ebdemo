@@ -47,6 +47,9 @@ var btnShowBox JoyButton
 var btnStart JoyButton
 
 var bulletList sync.Map
+var bulletList_cnt int
+var ebulletList sync.Map
+var ebulletList_cnt int
 
 //var bulletList map[int64]*Sprite
 var enemyList map[int64]*Sprite
@@ -54,6 +57,7 @@ var effctList map[int64]*Sprite
 var spriteCount int64
 
 type Gloable struct {
+	EnemyLife          int
 	Life               int
 	Level              int
 	Score              int
@@ -228,11 +232,12 @@ func init() {
 	robot.Position(float64(screenSize.X/2), float64(screenSize.Y/2)+100)
 	robot.CenterCoordonnates = true
 	robot.Start()
+	robot.Pause()
 
 	robot2 = NewSprite()
 	robot2.AddAnimationByte("default", &images.E_ROBO2, 2000, 8, ebiten.FilterNearest)
 	robot2.Name = "E_ROBO2"
-	robot2.Position(float64(screenSize.X/2), float64(screenSize.Y/2)+100)
+	robot2.Position(float64(screenSize.X-screenSize.X/2), float64(screenSize.Y-(screenSize.Y/2+100)))
 	robot2.CenterCoordonnates = true
 	robot2.Start()
 	robot2.Pause()
@@ -440,12 +445,21 @@ func (gl *GameLogic) InitSprite() {
 
 	gv.IsShowText = false
 	gv.Level = 0
+	gv.Life = 100
+	gv.EnemyLife = 100
 }
 func (gl *GameLogic) RemoveAllBullet() {
 	bulletList.Range(func(k, v interface{}) bool {
 		bulletList.Delete(k)
 		return true
 	})
+	bulletList_cnt = 0
+
+	ebulletList.Range(func(k, v interface{}) bool {
+		ebulletList.Delete(k)
+		return true
+	})
+	ebulletList_cnt = 0
 }
 func (gl *GameLogic) addbullet(x, y, degree float64) {
 
@@ -467,7 +481,33 @@ func (gl *GameLogic) addbullet(x, y, degree float64) {
 	spriteCount++
 
 	bulletList.Store(strconv.Itoa(int(spriteCount)), newsprite)
+	bulletList_cnt++
 	//bulletList[spriteCount] = newsprite
+}
+
+func (gl *GameLogic) addEnemybullet(x, y, degree float64) {
+
+	newsprite := NewSprite()
+	//newsprite.AddAnimationByte("default", &gfx.EXPLOSION3, 500, 9, ebiten.FilterNearest)
+	newsprite.AddAnimationByteCol("default", &images.RASER2, 200, 4, 6, ebiten.FilterNearest)
+	//newsprite.Name = "RASER2"
+	newsprite.Name = "RASER1"
+	newsprite.Position(x, y)
+	//newsprite.AddEffect(&EffectOptions{Effect: Zoom, Zoom: 3, Duration: 6000, Repeat: false, GoBack: true})
+	//newsprite.CenterCoordonnates = true
+	newsprite.Pause()
+	newsprite.Step(18)
+	newsprite.Speed = 8
+	newsprite.Angle = degree          //+90 GetDegreeByXY(xx, yy)
+	newsprite.Direction = degree + 90 // GetDegreeByXY(xx, yy) + 90
+
+	//newsprite.Start()
+
+	spriteCount++
+
+	ebulletList.Store(strconv.Itoa(int(spriteCount)), newsprite)
+	ebulletList_cnt++
+
 }
 func (gl *GameLogic) addbullet2(x, y, degree float64) {
 
@@ -487,8 +527,8 @@ func (gl *GameLogic) addbullet2(x, y, degree float64) {
 
 	spriteCount++
 
-	// bulletList[spriteCount] = newsprite
 	bulletList.Store(strconv.Itoa(int(spriteCount)), newsprite)
+	bulletList_cnt++
 }
 
 func (gl *GameLogic) drawCollideBox(screen *ebiten.Image, sp *Sprite) {
@@ -511,6 +551,93 @@ func (gl *GameLogic) drawCollideBox(screen *ebiten.Image, sp *Sprite) {
 
 //
 func (gl *GameLogic) checkCollision() {
+
+	ebulletList.Range(func(ikshot, ishot interface{}) bool {
+		kshot := ikshot.(string)
+		shot := ishot.(*Sprite)
+
+		if IsCollideWith(robot, ishot.(Collider)) {
+			//effctList[spriteCount] = newsprite
+
+			ebulletList.Delete(kshot)
+			ebulletList_cnt--
+
+			sound.PlaySe(sound.SeKindHit2)
+
+			gv.Life = gv.Life - 5
+
+			// add effect
+			newsprite := NewSprite()
+			newsprite.AddAnimationByte("default", &images.EXPLODE_MED, 500, 8, ebiten.FilterNearest)
+			newsprite.Position(shot.X, shot.Y)
+			newsprite.CenterCoordonnates = true
+			newsprite.Start()
+			spriteCount++
+			effctList[spriteCount] = newsprite
+
+			if gv.Life <= 0 {
+				gv.Life = 0
+
+				newsprite := NewSprite()
+
+				newsprite.AddAnimationByte("default", &images.EXPLODE_BIG, 2000, 10, ebiten.FilterNearest)
+
+				newsprite.Position(robot.X, robot.Y)
+				newsprite.CenterCoordonnates = true
+
+				newsprite.Start()
+				spriteCount++
+
+				effctList[spriteCount] = newsprite
+				sound.PlaySe(sound.SeKindBomb)
+
+			}
+			return false
+		}
+		return true
+
+	})
+
+	bulletList.Range(func(ikshot, ishot interface{}) bool {
+		kshot := ikshot.(string)
+		shot := ishot.(*Sprite)
+
+		if IsCollideWith(robot2, ishot.(Collider)) {
+			//effctList[spriteCount] = newsprite
+			bulletList.Delete(kshot)
+			bulletList_cnt--
+
+			sound.PlaySe(sound.SeKindHit2)
+
+			gv.EnemyLife = gv.EnemyLife - 5
+			// add effect
+			newsprite := NewSprite()
+			newsprite.AddAnimationByte("default", &images.EXPLODE_MED, 500, 8, ebiten.FilterNearest)
+			newsprite.Position(shot.X, shot.Y)
+			newsprite.CenterCoordonnates = true
+			newsprite.Start()
+			spriteCount++
+			effctList[spriteCount] = newsprite
+
+			if gv.EnemyLife <= 0 {
+				gv.EnemyLife = 0
+
+				robot2.Hide()
+
+				newsprite := NewSprite()
+				newsprite.AddAnimationByte("default", &images.EXPLODE_BIG, 2000, 10, ebiten.FilterNearest)
+				newsprite.Position(robot2.X, robot2.Y)
+				newsprite.CenterCoordonnates = true
+				newsprite.Start()
+				spriteCount++
+				effctList[spriteCount] = newsprite
+				sound.PlaySe(sound.SeKindBomb)
+
+			}
+		}
+		return true
+
+	})
 
 	for k, enemy := range enemyList {
 
@@ -589,6 +716,7 @@ func (gl *GameLogic) checkCollision() {
 			delete(enemyList, k)
 			//delete(bulletList, kshot)
 			bulletList.Delete(kshot)
+			bulletList_cnt--
 			sound.PlaySe(sound.SeKindHit2)
 			return true
 		})
@@ -648,6 +776,7 @@ func (gl *GameLogic) movePlan() {
 	robot.Pause()
 	if GetDirectByXY(xx, yy) > 0 {
 		robot.Step(GetDirectByXY(xx, yy))
+
 		degree = GetDegreeByXY(xx, yy)
 	}
 
@@ -669,7 +798,7 @@ func (gl *GameLogic) movePlan() {
 	if roundx != lastnetxx || roundy != lastnetyy {
 		lastnetxx = roundx
 		lastnetyy = roundy
-		gs_UpdatePosNow()
+		gs_UpdatePosNow(robot.X, robot.Y, robot.GetStep())
 
 		// if beaver_enable {
 		// 	beaverChat.PublishChannel(chan_name, fmt.Sprintf(`{"message":"%f,%f","id":"%s"}`, lastnetxx, lastnetyy, gamecfg.Uuid))
@@ -679,101 +808,155 @@ func (gl *GameLogic) movePlan() {
 
 }
 
+func (gl *GameLogic) SetLevel(level int) {
+	if level == 0 {
+		gv.Life = 100
+		gv.EnemyLife = 100
+
+		robot.Position(float64(screenSize.X/2), float64(screenSize.Y/2)+200)
+		robot.Show()
+
+		robot2.Position(float64(screenSize.X-screenSize.X/2), float64(screenSize.Y-(screenSize.Y/2+200)))
+		robot2.Show()
+	}
+
+	if level == 4 {
+
+		robot.Hide()
+
+	}
+
+	if level == 5 {
+
+		robot2.Hide()
+
+	}
+	gv.Level = level
+
+}
 func (g *Game) Update() error {
 	//第一次设置
 	if isFirstUpdate {
 		isFirstUpdate = false
 		gamelogic.InitSprite()
+		robot.Show()
+		robot2.Show()
+
 	}
 
-	gamelogic.movePlan()
-	gamelogic.FireBullet()
+	touchStr = ""
+
 	gamelogic.ShowHideDebug()
 
 	if gv.Level == 0 { //clickstart
 
 		robot.Show()
+		robot2.Show()
+		gamelogic.movePlan()
 		if btnStart.GetClicked() || btnShowBox.GetJoyButton() || ebiten.IsKeyPressed(ebiten.KeyS) {
 			gv.Level = 1
 			gv.Life = 100
+			gv.EnemyLife = 100
 			gv.Score = 0
+			gs_UpdateGameStatus(1)
 
 			gamelogic.RemoveAllBullet()
 			sound.StopBgm(sound.BgmOutThere)
 			sound.PlayBgm(sound.BgmKindBattle)
+
+			//TODO:send game start PACKAGE
 		}
 
 	}
 	if gv.Level == 1 { //level 1
-		gamelogic.GenEnemy()
+
+		gamelogic.movePlan()
+		gamelogic.FireBullet()
+		//gamelogic.GenEnemy()
 
 		if gv.Life <= 0 {
 			gv.Level = 4
+			gs_UpdateGameStatus(5)
 
 			gamelogic.RemoveAllBullet()
 			sound.StopBgm(sound.BgmKindBattle)
 			sound.PlayBgm(sound.BgmOutThere)
 		}
 
-		if gv.Score > 200 {
-			gv.Level = 2
-		}
-
-	}
-	if gv.Level == 2 { //level 2
-		gamelogic.GenEnemy_level2()
-		if gv.Life <= 0 {
-			gv.Level = 4
-			gamelogic.RemoveAllBullet()
-			sound.StopBgm(sound.BgmKindBattle)
-			sound.PlayBgm(sound.BgmOutThere)
-		}
-		if gv.Score > 300 {
+		if gv.EnemyLife <= 0 {
 			gv.Level = 5
-		}
-	}
+			gs_UpdateGameStatus(4)
 
-	if gv.Level == 3 {
-		gamelogic.GenEnemy_level2()
-
-		if gv.Life <= 0 {
-			gv.Level = 4
 			gamelogic.RemoveAllBullet()
 			sound.StopBgm(sound.BgmKindBattle)
 			sound.PlayBgm(sound.BgmOutThere)
 		}
 
-		if gv.Score > 300 {
-			gv.Level = 5
-		}
+		// if gv.Score > 200 {
+		// 	gv.Level = 2
+		// }
 
 	}
+	// if gv.Level == 2 { //level 2
+	// 	gamelogic.GenEnemy_level2()
+	// 	if gv.Life <= 0 {
+	// 		gv.Level = 4
+	// 		gamelogic.RemoveAllBullet()
+	// 		sound.StopBgm(sound.BgmKindBattle)
+	// 		sound.PlayBgm(sound.BgmOutThere)
+	// 	}
+	// 	if gv.Score > 300 {
+	// 		gv.Level = 5
+	// 	}
+	// }
+
+	// if gv.Level == 3 {
+	// 	gamelogic.GenEnemy_level2()
+
+	// 	if gv.Life <= 0 {
+	// 		gv.Level = 4
+	// 		gamelogic.RemoveAllBullet()
+	// 		sound.StopBgm(sound.BgmKindBattle)
+	// 		sound.PlayBgm(sound.BgmOutThere)
+	// 	}
+
+	// 	if gv.Score > 300 {
+	// 		gv.Level = 5
+	// 	}
+
+	// }
 
 	if gv.Level == 4 { //youlost
 		robot.Hide()
 
 		if btnStart.GetClicked() || btnShowBox.GetJoyButton() || ebiten.IsKeyPressed(ebiten.KeyS) {
-			gv.Level = 0
-			robot.Position(float64(screenSize.X/2), float64(screenSize.Y/2)+100)
+			gs_UpdateGameStatus(0)
+
 			gamelogic.RemoveAllBullet()
 			sound.StopBgm(sound.BgmOutThere)
 			sound.PlayBgm(sound.BgmKindBattle)
+
+			gamelogic.SetLevel(0)
 
 		}
 
 	}
 
 	if gv.Level == 5 { //youwin
-
+		gamelogic.movePlan()
+		gamelogic.FireBullet()
 		if btnStart.GetClicked() || btnShowBox.GetJoyButton() || ebiten.IsKeyPressed(ebiten.KeyS) {
-			gv.Level = 0
-			robot.Position(float64(screenSize.X/2), float64(screenSize.Y/2)+100)
+			gs_UpdateGameStatus(0)
+
 			bulletList.Range(func(k, v interface{}) bool {
 				bulletList.Delete(k)
+				bulletList_cnt--
 				return true
 			})
 			sound.StopBgm(sound.BgmOutThere)
 			sound.PlayBgm(sound.BgmKindBattle)
+
+			gamelogic.SetLevel(0)
 
 		}
 
@@ -787,6 +970,17 @@ func (g *Game) Update() error {
 		if gamelogic.OutofScreen(v.X, v.Y, 20) {
 			v.Hide()
 			bulletList.Delete(k)
+			bulletList_cnt--
+		}
+		return true
+	})
+	ebulletList.Range(func(kk, vv interface{}) bool {
+		k := kk.(string)
+		v := vv.(*Sprite)
+		if gamelogic.OutofScreen(v.X, v.Y, 20) {
+			v.Hide()
+			ebulletList.Delete(k)
+			ebulletList_cnt--
 		}
 		return true
 	})
@@ -812,11 +1006,15 @@ func (g *Game) Update() error {
 	}
 
 	//生成字符串
-	touchStr = touchStr + "\n" + fmt.Sprintf("[%d,%d]", joytouch.x, joytouch.y)
-	touchStr = touchStr + "\n" + fmt.Sprintf("[%d]", joytouch.tid)
-	touchStr = touchStr + "\n" + fmt.Sprintf("[%f]", robot.Angle)
+	touchStr = touchStr + "\n" + fmt.Sprintf("joyxy:[%d,%d]", joytouch.x, joytouch.y)
+	touchStr = touchStr + "\n" + fmt.Sprintf("tid:[%d]", joytouch.tid)
+	touchStr = touchStr + "\n" + fmt.Sprintf("Angle:[%f]", robot.Angle)
+	touchStr = touchStr + "\n" + fmt.Sprintf("Level:[%d]", gv.Level)
 
-	// touchStr = touchStr + "\n" + fmt.Sprintf("[%v]", len(bulletList))
+	touchStr = touchStr + "\n" + fmt.Sprintf("Blist[%d]", bulletList_cnt)
+	touchStr = touchStr + "\n" + fmt.Sprintf("eBlist[%d]", ebulletList_cnt)
+	touchStr = touchStr + "\n" + fmt.Sprintf("eff[%d]", len(effctList))
+	touchStr = touchStr + "\n" + fmt.Sprintf("ene[%d]", len(enemyList))
 	// touchStr = touchStr + "\n" + fmt.Sprintf("[%v]", len(enemyList))
 
 	return nil
@@ -843,12 +1041,12 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		ebitenutil.DebugPrint(screen, s)
 	}
 
-	paint.DrawText(screen, fmt.Sprintf("Life: %d Score: %d", gv.Life, gv.Score), screenSize.X/2-125, 100, color.Gray{0x99}, paint.FontSizeXLarge)
+	paint.DrawText(screen, fmt.Sprintf("Life: %d EnLife: %d Score: %d", gv.Life, gv.EnemyLife, gv.Score), screenSize.X/2-125, 100, color.Gray{0x99}, paint.FontSizeMedium)
 
 	//ebitenutil.DebugPrintAt(screen, , screenSize.X-200, 100)
 
 	joytouch.DrawBorders(screen, color.Gray16{0x1111})
-	touchpad.Draw(screen)
+	//touchpad.Draw(screen)
 
 	btnFire.DrawBorders(screen, color.Gray16{0x1111})
 	btnBullet.DrawBorders(screen, color.Gray16{0x1111})
@@ -857,13 +1055,28 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 	if gv.IsShowCollisionBox {
 		gamelogic.drawCollideBox(screen, robot)
+		gamelogic.drawCollideBox(screen, robot2)
+		gamelogic.drawCollideBox(screen, robotpath)
 	}
 
-	robotpath.Draw(screen)
+	if gv.IsShowText {
+		robotpath.Draw(screen)
+
+	}
 	robot.Draw(screen)
 	robot2.Draw(screen)
 
 	bulletList.Range(func(kk, vv interface{}) bool {
+
+		v := vv.(*Sprite)
+		if gv.IsShowCollisionBox {
+			gamelogic.drawCollideBox(screen, v)
+		}
+		v.Draw(screen)
+		return true
+	})
+
+	ebulletList.Range(func(kk, vv interface{}) bool {
 
 		v := vv.(*Sprite)
 		if gv.IsShowCollisionBox {

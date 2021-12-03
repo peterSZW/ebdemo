@@ -104,11 +104,17 @@ func gs_getIncomingClientUdp(gs_udpConnection *net.UDPConn) {
 						log15.Debug("dataPacket2", "data", dataPacket2)
 
 						if dataPacket2.TypeEx == 0 {
-							robot2.X = float64(dataPacket2.Data.X)
-							robot2.Y = float64(dataPacket2.Data.Y)
-						} else {
+							robot2.X = float64(float32(screenSize.X) - dataPacket2.Data.X)
+							robot2.Y = float64(float32(screenSize.Y) - dataPacket2.Data.Y)
+							robot2.Step(dataPacket2.Data.Step)
+						} else if dataPacket2.TypeEx == 1 {
 							//fire
-							gamelogic.addbullet(float64(dataPacket2.Data.X), float64(dataPacket2.Data.Y), float64(dataPacket2.Data.Degree))
+
+							gamelogic.addEnemybullet(float64(float32(screenSize.X)-dataPacket2.Data.X), float64(float32(screenSize.Y)-dataPacket2.Data.Y), float64(180+dataPacket2.Data.Degree))
+
+						} else if dataPacket2.TypeEx == 2 {
+							//fire
+							gamelogic.SetLevel(dataPacket2.Data.GameStatus)
 
 						}
 
@@ -129,15 +135,8 @@ func gs_UpdateFire(x, y, degree float64) {
 
 	user.Uuid = gamecfg.Uuid
 
-	type FirePos struct {
-		X      float32 `json:"x,omitempty"`
-		Y      float32 `json:"y,omitempty"`
-		Z      float32 `json:"z,omitempty"`
-		Degree float32 `json:"degree,omitempty"`
-	}
-
-	var fp FirePos
-	fp.Degree = float32(degree)
+	var fp UdpBrocastData
+	fp.Degree = int(degree)
 	fp.X = float32(x)
 	fp.Y = float32(y)
 	seq++
@@ -151,14 +150,34 @@ func gs_UpdateFire(x, y, degree float64) {
 	}
 }
 
-func gs_UpdatePosNow() {
+func gs_UpdateGameStatus(status int) {
 
 	user.Uuid = gamecfg.Uuid
 
-	user.PlayerPosition.X = float32(robot.X)
-	user.PlayerPosition.Y = float32(robot.Y)
+	var data UdpBrocastData
+	data.GameStatus = status
 	seq++
-	packetToSend := ServerPacket{Type: UpdatePos, TypeEx: 0, Token: gamecfg.Token, Uuid: user.Uuid, Seq: seq, Data: user.PlayerPosition}
+	packetToSend := ServerPacket{Type: UpdatePos, TypeEx: 2, Token: gamecfg.Token, Uuid: user.Uuid, Seq: seq, Data: data}
+
+	//packetToSend := StampPacket( gamecfg.Token,user.Uuid , user.PlayerPosition, UpdatePos)
+
+	_, err := packetToSend.SendUdpStream2(gs_udpConnection)
+	if err != nil {
+		log15.Error("", "err", err)
+	}
+}
+
+func gs_UpdatePosNow(x float64, y float64, step int) {
+
+	user.Uuid = gamecfg.Uuid
+
+	var data UdpBrocastData
+
+	data.X = float32(x)
+	data.Y = float32(y)
+	data.Step = step
+	seq++
+	packetToSend := ServerPacket{Type: UpdatePos, TypeEx: 0, Token: gamecfg.Token, Uuid: user.Uuid, Seq: seq, Data: data}
 
 	//packetToSend := StampPacket( gamecfg.Token,user.Uuid , user.PlayerPosition, UpdatePos)
 
@@ -169,12 +188,12 @@ func gs_UpdatePosNow() {
 }
 func gs_loopUpdate() {
 	for {
-		gs_UpdatePosNow()
+		gs_UpdatePosNow(robot.X, robot.Y, robot.GetStep())
 		time.Sleep(time.Duration(200 * time.Millisecond))
 	}
 
 }
-func gs_headtbeat() {
+func gs_Update_headtbeat() {
 	for {
 		user.Uuid = gamecfg.Uuid
 
@@ -189,6 +208,18 @@ func gs_headtbeat() {
 }
 
 func gs_udp_Dial() {
+
+	// user.Uuid = gamecfg.Uuid
+
+	packetToSend := StampPacket(gamecfg.Token, user.Uuid, nil, DialAddr)
+
+	_, err := packetToSend.SendUdpStream2(gs_udpConnection)
+	if err != nil {
+		log15.Error("gs_udp_Dial", "err", err)
+	}
+}
+
+func gs_gamestart() {
 
 	// user.Uuid = gamecfg.Uuid
 
@@ -233,7 +264,7 @@ func gs_udp_client() {
 	} else {
 
 		go gs_getIncomingClientUdp(gs_udpConnection)
-		go gs_headtbeat()
+		go gs_Update_headtbeat()
 		//ClientConsoleCLI(gs_udpConnection)
 	}
 

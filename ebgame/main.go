@@ -995,12 +995,15 @@ func (g *Game) Update() error {
 	}
 
 	//检查碰撞
-	gamelogic.checkCollision()
+	if gv.Level == 1 {
+		gamelogic.checkCollision()
+
+	}
 
 	//计算路径
 	p := path.Next()
 	robotpath.Position(p.x, p.y)
-
+	//重复计算路径
 	if path.LastProgress == path.Totallength {
 		path.Reset()
 	}

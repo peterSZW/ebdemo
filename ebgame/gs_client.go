@@ -79,6 +79,7 @@ type GsClient struct {
 }
 
 func init() {
+	gameserver_ip = "gzfjsoft.com"
 	url := fmt.Sprintf("http://%s:7403", gameserver_ip)
 	gs = NewGSConnect("", url)
 }
@@ -120,18 +121,26 @@ func (c *GsClient) command(method string, url string, payload string) ([]byte, e
 
 	res, err := client.Do(req)
 	if err != nil {
-		log15.Error("", "err", err)
+		log15.Error("client.Do", "err", err)
 		return nil, err
 	}
 	defer res.Body.Close()
 	body, err := ioutil.ReadAll(res.Body)
 	return body, err
 }
-func (c *GsClient) GetRooms() (*GSRspGetrooms, error) {
+func (c *GsClient) GetRooms(token string) (*GSRspGetrooms, error) {
 	method := "POST"
 	url := "/getrooms"
 
-	body, err := c.command(method, url, "")
+	type GSReqGetrooms struct {
+		Token string `json:"token,omitempty"`
+	}
+	var req GSReqGetrooms
+	req.Token = token
+
+	jsonreq, _ := json.Marshal(req)
+
+	body, err := c.command(method, url, string(jsonreq))
 
 	if err != nil {
 		return nil, err
@@ -215,7 +224,9 @@ func (c *GsClient) Joinroom(token, roomid string) (*GSRspJoinroom, error) {
 	}
 	var req GSReqJoinroom
 	req.Token = token
-	req.Debug = 1
+	//req.Debug = 1
+	req.Debug = 0
+
 	req.Roomid = roomid
 
 	jsonreq, _ := json.Marshal(req)
@@ -245,7 +256,8 @@ func (c *GsClient) Joinnewroom(token string) (*GSRspJoinnewroom, error) {
 	}
 	var req GSReqJoinnewroom
 	req.Token = token
-	req.Debug = 1
+	//req.Debug = 1
+	req.Debug = 0
 
 	jsonreq, _ := json.Marshal(req)
 

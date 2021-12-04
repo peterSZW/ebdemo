@@ -74,7 +74,7 @@ var path Path
 
 var gv Gloable
 
-const yamlFile = "/Library/Caches/ebdemo.yaml"
+var yamlFile = "/Library/Caches/ebdemo.yaml"
 
 type GameConfig struct {
 	Account   string `yaml:"Account"`
@@ -127,6 +127,11 @@ func init() {
 	homePath = os.Getenv("HOME")
 	//curPath = getCurrentDirectory()
 	//errstr = ""
+	if runtime.GOOS == "ios" {
+		yamlFile = "/Library/Caches/ebdemo.yaml"
+	} else {
+		yamlFile = "/ebdemo.yaml"
+	}
 
 	if file_exist(homePath + yamlFile) {
 		gamecfg.ReadFromYaml(homePath + yamlFile)
@@ -141,50 +146,56 @@ func init() {
 	// rsp, _ = gs.Join("peta", "abc")
 	// fmt.Println(rsp)
 
+	//runtime.GOOS
+
+	// if gamecfg.Uuid != "" {
+	// 	if beaver_enable {
+
+	// 		rsp, err := beaverChat.GetClient(gamecfg.Uuid)
+	// 		log15.Debug("GetClient:", rsp)
+	// 		if err != nil {
+	// 			log15.Error("", "err", err)
+	// 			gamecfg.Uuid = ""
+	// 			//log15.Debug(rsp)
+	// 		} else {
+
+	// 			gamecfg.Uuid = rsp.ID
+	// 			gamecfg.Token = rsp.Token
+	// 		}
+	// 	}
+	// }
+
+	// if gamecfg.Uuid == "" {
+	// 	if beaver_enable {
+	// 		_, err := beaverChat.CreateChannel(chan_name, "public")
+	// 		if err != nil {
+	// 			log15.Error("", "err", err)
+
+	// 		}
+
+	// 		rsp, err := beaverChat.CreateClient([]string{chan_name})
+	// 		log15.Debug("CreateClient", "rsp", rsp)
+	// 		if err == nil {
+	// 			gamecfg.Uuid = rsp.ID
+	// 			gamecfg.Token = rsp.ID
+	// 		} else {
+	// 			log15.Error("", "err", err)
+	// 		}
+	// 	}
+
+	// }
+	// if aroundus_enable {
+	// 	gamecfg.Uuid = uuid.NewV4().String()
+	// }
+
 	if gamecfg.Account == "" {
-		rand.Seed(time.Now().UnixNano())
-		gamecfg.Account = "peter" + strconv.Itoa(rand.Int()%10000)
-	}
-	if gamecfg.Uuid != "" {
-		if beaver_enable {
 
-			rsp, err := beaverChat.GetClient(gamecfg.Uuid)
-			log15.Debug("GetClient:", rsp)
-			if err != nil {
-				log15.Error("", "err", err)
-				gamecfg.Uuid = ""
-				//log15.Debug(rsp)
-			} else {
-
-				gamecfg.Uuid = rsp.ID
-				gamecfg.Token = rsp.Token
-			}
-		}
+		gamecfg.Account = "gs" + strconv.Itoa(rand.Int()%100000000)
 	}
 
 	if gamecfg.Uuid == "" {
-		if beaver_enable {
-			_, err := beaverChat.CreateChannel(chan_name, "public")
-			if err != nil {
-				log15.Error("", "err", err)
-
-			}
-
-			rsp, err := beaverChat.CreateClient([]string{chan_name})
-			log15.Debug("CreateClient", "rsp", rsp)
-			if err == nil {
-				gamecfg.Uuid = rsp.ID
-				gamecfg.Token = rsp.ID
-			} else {
-				log15.Error("", "err", err)
-			}
-		}
-
-	}
-	if aroundus_enable {
 		gamecfg.Uuid = uuid.NewV4().String()
 	}
-	aroundus_ip = "192.168.2.250"
 
 	// NewUser()
 
@@ -193,8 +204,13 @@ func init() {
 	}
 
 	log15.Debug("write", "gamecfg", gamecfg, "path", homePath+yamlFile)
-	gameserver_ip = "192.168.2.250"
-	gs.URL = fmt.Sprintf("http://%s:7403", gameserver_ip)
+
+	if file_exist("main.go") { //开发环境，所以随机名称
+		rand.Seed(time.Now().UnixNano())
+		gamecfg.Account = "peter" + strconv.Itoa(rand.Int()%10000)
+	}
+
+	// gs.URL = fmt.Sprintf("http://%s:7403", gameserver_ip)
 	rsp0, _ := gs.Signup(gamecfg.Account, "abc")
 	log15.Debug("singup", "rsp", rsp0)
 
@@ -203,8 +219,17 @@ func init() {
 
 	if rsp1 != nil {
 		gamecfg.Token = rsp1.Token
-		rsp2, _ := gs.Joinroom(rsp1.Token, "myroom")
-		log15.Debug("Joinroom", "rsp", rsp2)
+		rspGetrooms, err := gs.GetRooms(rsp1.Token)
+		if err == nil {
+			if len(rspGetrooms.Ids) >= 1 {
+				rsp2, _ := gs.Joinroom(rsp1.Token, rspGetrooms.Ids[0])
+				log15.Debug("Joinroom", "rsp", rsp2)
+			} else {
+				rsp2, _ := gs.Joinnewroom(rsp1.Token)
+				log15.Debug("Joinnewroom", "rsp", rsp2)
+			}
+		}
+
 	}
 
 	gs_udp_client()
@@ -1039,9 +1064,9 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	}
 	if gv.IsShowText {
 		mx, my := ebiten.CursorPosition()
-		s := fmt.Sprintf("\n\n\n%s\nFPS : %f %d %d\n%v\n%s\n%s\n%s",
-			homePath, ebiten.CurrentFPS(), mx, my,
-			file_exist(homePath+yamlFile), gamecfg.Uuid, runtime.GOOS, touchStr)
+		s := fmt.Sprintf("\n\n\n%s\n%s\nFPS:%f Cursor:[%d,%d]\nfexist:%v\nuuid:%s\nos:%s acc:%s\n%s",
+			homePath, yamlFile, ebiten.CurrentFPS(), mx, my,
+			file_exist(homePath+yamlFile), gamecfg.Uuid, runtime.GOOS, gamecfg.Account, touchStr)
 		ebitenutil.DebugPrint(screen, s)
 	}
 

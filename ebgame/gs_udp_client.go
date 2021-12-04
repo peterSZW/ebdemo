@@ -13,11 +13,9 @@ import (
 	// "github.com/peterSZW/ebdemo/ebgame/internal/aroundUsServer/packet"
 	// "github.com/peterSZW/ebdemo/ebgame/internal/aroundUsServer/player"
 
-	uuid "github.com/satori/go.uuid"
 	"github.com/xiaomi-tc/log15"
 )
 
-var gameserver_url string
 var gameserver_enable bool
 
 func gs_TryApi(url string) bool {
@@ -35,32 +33,32 @@ func gs_TryApi(url string) bool {
 
 var gameserver_ip string
 
-func gs_init() {
-	log15.Debug("init gameserver_url")
+// func gs_init() {
+// 	log15.Debug("init gameserver_url")
 
-	beaver_url = "http://192.168.2.250:7403"
-	gameserver_ip = "192.168.2.250"
+// 	beaver_url = "http://192.168.2.250:7403"
+// 	gameserver_ip = "192.168.2.250"
 
-	if !TryApi(beaver_url) {
-		beaver_url = "http://192.168.2.218:7403"
-		gameserver_ip = "192.168.2.250"
+// 	if !TryApi(beaver_url) {
+// 		beaver_url = "http://192.168.2.218:7403"
+// 		gameserver_ip = "192.168.2.250"
 
-		if !TryApi(beaver_url) {
-			beaver_url = "http://villa.tpddns.cn:7403"
-			gameserver_ip = "villa.tpddns.cn"
-			if !TryApi(beaver_url) {
-				return
-			}
-		}
+// 		if !TryApi(beaver_url) {
+// 			beaver_url = "http://villa.tpddns.cn:7403"
+// 			gameserver_ip = "villa.tpddns.cn"
+// 			if !TryApi(beaver_url) {
+// 				return
+// 			}
+// 		}
 
-	}
+// 	}
 
-	gameserver_enable = true
-	if gameserver_enable {
-		gamecfg.Uuid = uuid.NewV4().String()
-	}
+// 	gameserver_enable = true
+// 	if gameserver_enable {
+// 		gamecfg.Uuid = uuid.NewV4().String()
+// 	}
 
-}
+// }
 
 func gs_getIncomingClientUdp(gs_udpConnection *net.UDPConn) {
 	errx := error(nil)
@@ -246,7 +244,7 @@ func gs_udp_client() {
 	// 	IP:   net.IPv4(192, 168, 2, 218),
 	// 	Port: 7403,
 	// }
-	gameserver_ip = "192.168.2.250"
+
 	ipp, _ := net.ResolveIPAddr("ip", gameserver_ip)
 
 	user.UdpAddress = &net.UDPAddr{

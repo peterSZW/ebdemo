@@ -12,7 +12,6 @@ import (
 	"github.com/imroc/req"
 	"github.com/peterSZW/ebdemo/ebgame/internal/aroundUsServer/packet"
 	"github.com/peterSZW/ebdemo/ebgame/internal/aroundUsServer/player"
-	uuid "github.com/satori/go.uuid"
 	"github.com/xiaomi-tc/log15"
 )
 
@@ -37,32 +36,32 @@ func TryApi(url string) bool {
 
 var aroundus_ip string
 
-func arus_init() {
-	log15.Debug("init aroundus_url")
+// func arus_init() {
+// 	log15.Debug("init aroundus_url")
 
-	beaver_url = "http://192.168.2.250:7403"
-	aroundus_ip = "192.168.2.250"
+// 	beaver_url = "http://192.168.2.250:7403"
+// 	aroundus_ip = "192.168.2.250"
 
-	if !TryApi(beaver_url) {
-		beaver_url = "http://192.168.2.218:7403"
-		aroundus_ip = "192.168.2.218"
+// 	if !TryApi(beaver_url) {
+// 		beaver_url = "http://192.168.2.218:7403"
+// 		aroundus_ip = "192.168.2.218"
 
-		if !TryApi(beaver_url) {
-			beaver_url = "http://villa.tpddns.cn:7403"
-			aroundus_ip = "villa.tpddns.cn"
-			if !TryApi(beaver_url) {
-				return
-			}
-		}
+// 		if !TryApi(beaver_url) {
+// 			beaver_url = "http://villa.tpddns.cn:7403"
+// 			aroundus_ip = "villa.tpddns.cn"
+// 			if !TryApi(beaver_url) {
+// 				return
+// 			}
+// 		}
 
-	}
+// 	}
 
-	aroundus_enable = true
-	if aroundus_enable {
-		gamecfg.Uuid = uuid.NewV4().String()
-	}
+// 	aroundus_enable = true
+// 	if aroundus_enable {
+// 		gamecfg.Uuid = uuid.NewV4().String()
+// 	}
 
-}
+// }
 
 func getIncomingClientUdp(udpConnection *net.UDPConn) {
 	errx := error(nil)
@@ -185,7 +184,7 @@ func udp_client() {
 	// 	IP:   net.IPv4(192, 168, 2, 218),
 	// 	Port: 7403,
 	// }
-	ipp, _ := net.ResolveIPAddr("ip", aroundus_ip)
+	ipp, _ := net.ResolveIPAddr("ip", gameserver_ip)
 
 	user.UdpAddress = &net.UDPAddr{
 		IP:   ipp.IP,

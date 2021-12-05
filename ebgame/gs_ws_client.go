@@ -1,6 +1,6 @@
 package ebgame
 
-// beave websocket
+// gs websocket
 
 import (
 	"encoding/json"
@@ -17,23 +17,23 @@ import (
 	"github.com/xiaomi-tc/log15"
 )
 
-var addr = flag.String("addr", "192.168.2.218:7800", "http service address")
+var gs_addr = flag.String("addr", "gzfjsoft.com:7403", "http service address")
 
-type ClientResp struct {
+type gs_ClientResp struct {
 	From_client string `json:"from_client"`
 	To_client   string `json:"to_client"`
 	Channel     string `json:"channel"`
 	Data        string `json:"data"`
 }
 
-type rspData struct {
+type gs_rspData struct {
 	Message string `json:"message"`
 	Id      string `json:"id"`
 }
 
-func handle(s []byte) {
-	var msg ClientResp
-	var dt rspData
+func gs_handle(s []byte) {
+	var msg gs_ClientResp
+	var dt gs_rspData
 	json.Unmarshal((s), &msg)
 
 	json.Unmarshal([]byte(msg.Data), &dt)
@@ -48,7 +48,7 @@ func handle(s []byte) {
 
 }
 
-func ws_client() {
+func gs_ws_client() {
 	flag.Parse()
 	log.SetFlags(0)
 
@@ -76,7 +76,7 @@ func ws_client() {
 				return
 			}
 			//log.Printf("recv: %s", message)
-			handle(message)
+			gs_handle(message)
 
 		}
 	}()

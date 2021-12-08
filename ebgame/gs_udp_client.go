@@ -59,7 +59,52 @@ var gameserver_ip string
 // 	}
 
 // }
+func Handle_cmd(data []byte) {
+	log15.Debug("ReadFromUDP_WS", "data", string(data))
 
+	var dataPacket ServerPacket
+	err2 := json.Unmarshal(data, &dataPacket)
+	if err2 != nil {
+		log15.Error("Unmarshal", "err", err2)
+		//log15.Error("","err","Couldn't parse json player data! Skipping iteration!")
+		return
+	} else {
+		if dataPacket.Data != nil {
+			if dataPacket.Type == PositionBroadcast || dataPacket.Type == UpdatePos {
+				//json.mas
+				//log15.Debug(string(data))
+
+				if dataPacket.Token != gamecfg.Token {
+					var dataPacket2 TUpdatePosReq
+					err2 := json.Unmarshal(data, &dataPacket2)
+					if err2 != nil {
+						log15.Error("Unmarshal", "err", err2)
+					}
+
+					log15.Debug("dataPacket2", "data", dataPacket2)
+
+					if dataPacket2.TypeEx == 0 {
+						robot2.X = float64(float32(screenSize.X) - dataPacket2.Data.X)
+						robot2.Y = float64(float32(screenSize.Y) - dataPacket2.Data.Y)
+						robot2.Step(dataPacket2.Data.Step)
+					} else if dataPacket2.TypeEx == 1 {
+						//fire
+
+						gamelogic.addEnemybullet(float64(float32(screenSize.X)-dataPacket2.Data.X), float64(float32(screenSize.Y)-dataPacket2.Data.Y), float64(180+dataPacket2.Data.Degree))
+
+					} else if dataPacket2.TypeEx == 2 {
+						//fire
+						gamelogic.SetLevel(dataPacket2.Data.GameStatus)
+
+					}
+
+				}
+
+			}
+		}
+
+	}
+}
 func gs_getIncomingClientUdp(gs_udpConnection *net.UDPConn) {
 	errx := error(nil)
 	log15.Debug("Client listen....")
@@ -78,50 +123,8 @@ func gs_getIncomingClientUdp(gs_udpConnection *net.UDPConn) {
 		//log15.Error("","err",addr)
 		data := buffer[:size]
 
-		log15.Debug("ReadFromUDP", "data", string(data))
-
-		var dataPacket ServerPacket
-		err2 := json.Unmarshal(data, &dataPacket)
-		if err2 != nil {
-			log15.Error("Unmarshal", "err", err2)
-			//log15.Error("","err","Couldn't parse json player data! Skipping iteration!")
-			continue
-		} else {
-			if dataPacket.Data != nil {
-				if dataPacket.Type == PositionBroadcast || dataPacket.Type == UpdatePos {
-					//json.mas
-					//log15.Debug(string(data))
-
-					if dataPacket.Token != gamecfg.Token {
-						var dataPacket2 TUpdatePosReq
-						err2 := json.Unmarshal(data, &dataPacket2)
-						if err2 != nil {
-							log15.Error("Unmarshal", "err", err2)
-						}
-
-						log15.Debug("dataPacket2", "data", dataPacket2)
-
-						if dataPacket2.TypeEx == 0 {
-							robot2.X = float64(float32(screenSize.X) - dataPacket2.Data.X)
-							robot2.Y = float64(float32(screenSize.Y) - dataPacket2.Data.Y)
-							robot2.Step(dataPacket2.Data.Step)
-						} else if dataPacket2.TypeEx == 1 {
-							//fire
-
-							gamelogic.addEnemybullet(float64(float32(screenSize.X)-dataPacket2.Data.X), float64(float32(screenSize.Y)-dataPacket2.Data.Y), float64(180+dataPacket2.Data.Degree))
-
-						} else if dataPacket2.TypeEx == 2 {
-							//fire
-							gamelogic.SetLevel(dataPacket2.Data.GameStatus)
-
-						}
-
-					}
-
-				}
-			}
-
-		}
+		//============
+		Handle_cmd(data)
 
 	}
 
@@ -148,8 +151,7 @@ func gs_UpdateFire(x, y, degree float64) {
 	}
 }
 
-func gs_UpdateGameStatus(status int) {
-
+func str_UpdateGameStatus(status int) []byte {
 	user.Uuid = gamecfg.Uuid
 
 	var data UdpBrocastData
@@ -157,11 +159,20 @@ func gs_UpdateGameStatus(status int) {
 	seq++
 	packetToSend := ServerPacket{Type: UpdatePos, TypeEx: 2, Token: gamecfg.Token, Uuid: user.Uuid, Seq: seq, Data: data}
 
-	//packetToSend := StampPacket( gamecfg.Token,user.Uuid , user.PlayerPosition, UpdatePos)
-
-	_, err := packetToSend.SendUdpStream2(gs_udpConnection)
+	packetJson, err := json.Marshal(packetToSend)
 	if err != nil {
-		log15.Error("", "err", err)
+		log15.Error("Marshal", "err", err)
+		return []byte("")
+
+	}
+	log15.Debug("SendUdpStream2", "pack", string(packetJson))
+	return packetJson
+}
+func gs_UpdateGameStatus(status int) {
+	packetJson := str_UpdateGameStatus(status)
+	_, err := gs_udpConnection.Write(packetJson)
+	if err != nil {
+		log15.Error("gs_udpConnection.Write", "err", err)
 	}
 }
 

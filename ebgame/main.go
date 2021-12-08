@@ -885,7 +885,7 @@ func (g *Game) Update() error {
 			gv.Life = 100
 			gv.EnemyLife = 100
 			gv.Score = 0
-			gs_UpdateGameStatus(1)
+			gs_ws_UpdateGameStatus(1)
 
 			gamelogic.RemoveAllBullet()
 			sound.StopBgm(sound.BgmOutThere)
@@ -903,7 +903,7 @@ func (g *Game) Update() error {
 
 		if gv.Life <= 0 {
 			gv.Level = 4
-			gs_UpdateGameStatus(5)
+			gs_ws_UpdateGameStatus(5)
 
 			gamelogic.RemoveAllBullet()
 			sound.StopBgm(sound.BgmKindBattle)
@@ -912,7 +912,7 @@ func (g *Game) Update() error {
 
 		if gv.EnemyLife <= 0 {
 			gv.Level = 5
-			gs_UpdateGameStatus(4)
+			gs_ws_UpdateGameStatus(4)
 
 			gamelogic.RemoveAllBullet()
 			sound.StopBgm(sound.BgmKindBattle)
@@ -957,7 +957,7 @@ func (g *Game) Update() error {
 		robot.Hide()
 
 		if btnStart.GetClicked() || btnShowBox.GetJoyButton() || ebiten.IsKeyPressed(ebiten.KeyS) {
-			gs_UpdateGameStatus(0)
+			gs_ws_UpdateGameStatus(0)
 
 			gamelogic.RemoveAllBullet()
 			sound.StopBgm(sound.BgmOutThere)
@@ -973,7 +973,7 @@ func (g *Game) Update() error {
 		gamelogic.movePlan()
 		gamelogic.FireBullet()
 		if btnStart.GetClicked() || btnShowBox.GetJoyButton() || ebiten.IsKeyPressed(ebiten.KeyS) {
-			gs_UpdateGameStatus(0)
+			gs_ws_UpdateGameStatus(0)
 
 			bulletList.Range(func(k, v interface{}) bool {
 				bulletList.Delete(k)

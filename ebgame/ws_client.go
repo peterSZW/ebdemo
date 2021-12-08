@@ -17,7 +17,9 @@ import (
 	"github.com/xiaomi-tc/log15"
 )
 
-var addr = flag.String("addr", "192.168.2.218:7800", "http service address")
+var addr = "192.168.2.218:7800"
+
+//flag.String("addr", "192.168.2.218:7800", "http service address")
 
 type ClientResp struct {
 	From_client string `json:"from_client"`
@@ -55,7 +57,7 @@ func ws_client() {
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt)
 
-	u := url.URL{Scheme: "ws", Host: *addr, Path: "/ws/" + gamecfg.Uuid + "/" + gamecfg.Token}
+	u := url.URL{Scheme: "ws", Host: addr, Path: "/ws/" + gamecfg.Uuid + "/" + gamecfg.Token}
 	log.Printf("connecting to %s", u.String())
 
 	c, _, err := websocket.DefaultDialer.Dial(u.String(), nil)

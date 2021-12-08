@@ -3,14 +3,11 @@ package ebgame
 // gs websocket
 
 import (
-	"encoding/json"
 	"flag"
 	"log"
 	"net/url"
 	"os"
 	"os/signal"
-	"strconv"
-	"strings"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -31,31 +28,42 @@ type gs_rspData struct {
 	Id      string `json:"id"`
 }
 
-func gs_handle(s []byte) {
-	var msg gs_ClientResp
-	var dt gs_rspData
-	json.Unmarshal((s), &msg)
+// func gs_handle(s []byte) {
+// 	var msg gs_ClientResp
+// 	var dt gs_rspData
+// 	json.Unmarshal((s), &msg)
 
-	json.Unmarshal([]byte(msg.Data), &dt)
-	if dt.Id != gamecfg.Uuid {
-		ss := strings.Split(dt.Message, ",")
-		x, _ := strconv.ParseFloat(ss[0], 64)
-		y, _ := strconv.ParseFloat(ss[1], 64)
-		robot2.X = x
-		robot2.Y = y
+// 	json.Unmarshal([]byte(msg.Data), &dt)
+// 	if dt.Id != gamecfg.Uuid {
+// 		ss := strings.Split(dt.Message, ",")
+// 		x, _ := strconv.ParseFloat(ss[0], 64)
+// 		y, _ := strconv.ParseFloat(ss[1], 64)
+// 		robot2.X = x
+// 		robot2.Y = y
 
-	}
+// 	}
 
-}
+// }
 
 var c *websocket.Conn
 
-func gs_ws_send(msg string) {
+func gs_ws_send(msg []byte) {
 	if c != nil {
-		err := c.WriteMessage(websocket.TextMessage, []byte(msg))
-		log15.Error("WriteMessage:", "err", err)
+		err := c.WriteMessage(websocket.TextMessage, (msg))
+		if err != nil {
+			log15.Error("WriteMessage:", "err", err)
+		}
+
 	}
 }
+
+func gs_ws_UpdateGameStatus(status int) {
+	packetJson := str_UpdateGameStatus(status)
+
+	gs_ws_send(packetJson)
+
+}
+
 func gs_ws_client() {
 	flag.Parse()
 	log.SetFlags(0)
@@ -64,7 +72,7 @@ func gs_ws_client() {
 	signal.Notify(interrupt, os.Interrupt)
 
 	//u := url.URL{Scheme: "ws", Host: *addr, Path: "/ws/" + gamecfg.Uuid + "/" + gamecfg.Token}
-	u := url.URL{Scheme: "ws", Host: gameserver_ip, Path: "/"}
+	u := url.URL{Scheme: "ws", Host: gameserver_ip + ":7403", Path: "/"}
 	log.Printf("connecting to %s", u.String())
 
 	var err error
@@ -86,12 +94,14 @@ func gs_ws_client() {
 				return
 			}
 			//log.Printf("recv: %s", message)
-			gs_handle(message)
+			//gs_handle(message)
+
+			Handle_cmd(message)
 
 		}
 	}()
 
-	gs_ws_send(gamecfg.Token)
+	gs_ws_send([]byte(gamecfg.Token))
 
 	// ticker := time.NewTicker(time.Second)
 	// defer ticker.Stop()

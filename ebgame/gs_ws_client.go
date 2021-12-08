@@ -48,6 +48,14 @@ func gs_handle(s []byte) {
 
 }
 
+var c *websocket.Conn
+
+func gs_ws_send(msg string) {
+	if c != nil {
+		err := c.WriteMessage(websocket.TextMessage, []byte(msg))
+		log15.Error("WriteMessage:", "err", err)
+	}
+}
 func gs_ws_client() {
 	flag.Parse()
 	log.SetFlags(0)
@@ -55,10 +63,12 @@ func gs_ws_client() {
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt)
 
-	u := url.URL{Scheme: "ws", Host: *addr, Path: "/ws/" + gamecfg.Uuid + "/" + gamecfg.Token}
+	//u := url.URL{Scheme: "ws", Host: *addr, Path: "/ws/" + gamecfg.Uuid + "/" + gamecfg.Token}
+	u := url.URL{Scheme: "ws", Host: gameserver_ip, Path: "/"}
 	log.Printf("connecting to %s", u.String())
 
-	c, _, err := websocket.DefaultDialer.Dial(u.String(), nil)
+	var err error
+	c, _, err = websocket.DefaultDialer.Dial(u.String(), nil)
 	if err != nil {
 		log15.Error("dial:", "err", err)
 		return
@@ -81,20 +91,22 @@ func gs_ws_client() {
 		}
 	}()
 
-	ticker := time.NewTicker(time.Second)
-	defer ticker.Stop()
+	gs_ws_send(gamecfg.Token)
+
+	// ticker := time.NewTicker(time.Second)
+	// defer ticker.Stop()
 
 	for {
 		select {
 		case <-done:
 			return
-		case t := <-ticker.C:
-			log15.Error("", "err", t)
-			// err := c.WriteMessage(websocket.TextMessage, []byte(t.String()))
-			// if err != nil {
-			// 	log15.Error("","err","write:", err)
-			// 	return
-			// }
+		// case t := <-ticker.C:
+		// log15.Error("timer", "t", t)
+		// err := c.WriteMessage(websocket.TextMessage, []byte(t.String()))
+		// if err != nil {
+		// 	log15.Error("","err","write:", err)
+		// 	return
+		// }
 		case <-interrupt:
 			log15.Error("", "err", "interrupt")
 

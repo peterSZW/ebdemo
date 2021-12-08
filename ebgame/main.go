@@ -234,6 +234,7 @@ func init() {
 
 	gs_udp_client()
 	gs_udp_Dial()
+	go gs_ws_client()
 
 	//errstr = gamecfg.Uuid
 
